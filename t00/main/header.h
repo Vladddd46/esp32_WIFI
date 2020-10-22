@@ -24,7 +24,7 @@
 #include <ctype.h>
 
 /* Config */
-#define COMMAND_LINE_MAX_LENGTH 1024
+#define COMMAND_LINE_MAX_LENGTH 100
 #define UART_PORT 				UART_NUM_1
 #define NEWLINE 				"\n\r"		
 
@@ -34,4 +34,6 @@ QueueHandle_t uart0_queue;
 void user_input();
 void cmd_handler();
 void execute(char **cmd, int len);
-void uart_init(int baud_rate);
+
+
+uint8_t *get_input_from_uart();
