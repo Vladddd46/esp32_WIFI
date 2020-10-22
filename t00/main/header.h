@@ -34,5 +34,5 @@ void user_input();
 void cmd_handler();
 void execute(char **cmd, int len);
 
-
 uint8_t *get_input_from_uart();
+void connect_command(char **cmd);

@@ -17,8 +17,8 @@ void execute(char **cmd, int len) {
     if (len == 0) {
         // pass
     }
-    else if (!strcmp(cmd[0], "command")) {
-        // pass
+    else if (!strcmp(cmd[0], "connect")) {
+        connect_command(cmd);
     }
     else 
         no_such_command_error();

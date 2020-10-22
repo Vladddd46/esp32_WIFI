@@ -119,15 +119,19 @@ void user_input() {
 void cmd_handler() {
     char result[1000];
     bzero(result, 1000);
-
+    int index = 0;
+    char *p = NULL;
     char **cmd = (char **)malloc(100 * sizeof(char *));
-    if (cmd == NULL) exit(1);
+    if (cmd == NULL) {
+        printf("Malloc returned NULL. Fatal error.\n");
+        exit(1);
+    }
+
     while(1) {
         if (xQueueReceive(global_input_queue, result, (200 / portTICK_PERIOD_MS))) {
             for (int i = 0; i < 100; ++i) cmd[i] = NULL;
             // splitting str into arr.
-            int index = 0;
-            char *p;
+            index = 0;
             p = strtok(result, " ");
             cmd[index] = p;
             index++;
