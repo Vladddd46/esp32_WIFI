@@ -5,11 +5,9 @@
 #include <string.h>
 #include "driver/uart.h"
 #include "driver/gpio.h"
-#include "wrappers.h"
 #include "driver/dac.h"
 #include "driver/ledc.h"
 #include <regex.h> 
-#include "get_dht11_data.h"
 #include "libmx.h"
 #include "esp_types.h"
 #include "freertos/queue.h"
@@ -22,6 +20,7 @@
 #include "driver/i2s.h"
 #include <strings.h>
 #include <ctype.h>
+#include "nvs_flash.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100

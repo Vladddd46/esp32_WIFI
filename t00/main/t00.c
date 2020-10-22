@@ -1,6 +1,4 @@
 #include "header.h"
-#include "nvs_flash.h"
-
 
 #define UART_TX_PIN 17
 #define UART_RX_PIN 16
