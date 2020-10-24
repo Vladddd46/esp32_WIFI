@@ -133,6 +133,25 @@ char *save_spaces_in_quotes(char *input) {
 
 
 
+char **unlock_spaces_in_quotes(char **cmd) {
+    int cmd_len    = mx_strarr_len(cmd);
+    char **new_cmd = mx_strarr_new(cmd_len);
+    char *tmp;
+
+    for (int i = 0; cmd[i]; ++i) {
+        tmp = mx_strnew(strlen(cmd[i]));
+        for (int j = 0; cmd[i][j]; ++j) {
+            if (cmd[i][j] == 8) {
+                tmp[j] = ' ';
+            }
+            else {
+                tmp[j] = cmd[i][j];
+            }
+        }
+        new_cmd[i] = tmp;
+    }
+    return new_cmd;
+}
 
 /*
  * Receives user`s input from Queue.
@@ -151,8 +170,9 @@ void cmd_handler() {
         exit(1);
     }
     char *locked_spaces_in_quote;
+    char **new_cmd;
 
-    while(1) {
+    while(1) {  
         if (xQueueReceive(global_input_queue, received_input, (200 / portTICK_PERIOD_MS))) {
             for (int i = 0; i < 100; ++i) cmd[i] = NULL;
             locked_spaces_in_quote = save_spaces_in_quotes(received_input);
@@ -168,10 +188,17 @@ void cmd_handler() {
                 index++;
             }
             // 
+            new_cmd = unlock_spaces_in_quotes(cmd);
             int cmd_len = 0;
             while(cmd[cmd_len] && cmd_len < 100) cmd_len++;
-            execute(cmd, cmd_len);
+            execute(new_cmd, cmd_len);
+
             free(locked_spaces_in_quote);
+            for (int i = 0; new_cmd[i]; ++i) {
+                free(new_cmd[i]);
+            }
+            free(new_cmd);
+
         }
     }
 }

@@ -14,29 +14,6 @@ static int strlen_mod(const char *s, char c) {
 
 
 
-static int mx_count_words(const char *str, char c) {
-    int count = 0;
-
-    if (str != NULL) {
-        while(*str != '\0') {
-            if (*str != c) {
-                count++;
-                while(*str != c && *str != '\0') {
-                    str++;
-                }
-            } else {
-                str++;
-            }
-        }
-    } else {
-        count = -1;
-    }
-
-    return count;
-}
-
-
-
 char **mx_strsplit(const char *str, char c) {
     int amount_words = 0;
     int j = 0;
