@@ -106,6 +106,30 @@ void user_input() {
 }
 
 
+char *save_spaces_in_quotes(char *input) {
+    char *saved_spaces = mx_strnew(strlen(input));
+
+    bool quote = 0;
+
+    for (int i = 0; input[i]; ++i) {
+        if (input[i] == '"') {
+            if (quote) {
+                quote = 0;
+            }
+            else {
+                quote = 1;
+            }
+        }
+
+        if (input[i] == ' ' && quote  == 1) {
+            saved_spaces[i] = 8;
+        }
+        else {
+            saved_spaces[i] = input[i];
+        }
+    }
+    return saved_spaces;
+}
 
 
 
@@ -117,8 +141,8 @@ void user_input() {
  * of executing command.
  */
 void cmd_handler() {
-    char result[1000];
-    bzero(result, 1000);
+    char received_input[1000];
+    bzero(received_input, 1000);
     int index = 0;
     char *p = NULL;
     char **cmd = (char **)malloc(100 * sizeof(char *));
@@ -126,13 +150,16 @@ void cmd_handler() {
         printf("Malloc returned NULL. Fatal error.\n");
         exit(1);
     }
+    char *locked_spaces_in_quote;
 
     while(1) {
-        if (xQueueReceive(global_input_queue, result, (200 / portTICK_PERIOD_MS))) {
+        if (xQueueReceive(global_input_queue, received_input, (200 / portTICK_PERIOD_MS))) {
             for (int i = 0; i < 100; ++i) cmd[i] = NULL;
+            locked_spaces_in_quote = save_spaces_in_quotes(received_input);
+
             // splitting str into arr.
             index = 0;
-            p = strtok(result, " ");
+            p = strtok(locked_spaces_in_quote, " ");
             cmd[index] = p;
             index++;
             while(p != NULL || index < 100) {
@@ -144,6 +171,7 @@ void cmd_handler() {
             int cmd_len = 0;
             while(cmd[cmd_len] && cmd_len < 100) cmd_len++;
             execute(cmd, cmd_len);
+            free(locked_spaces_in_quote);
         }
     }
 }
