@@ -13,7 +13,6 @@ static void no_such_command_error() {
 
 
 void execute(char **cmd, int len) {
-
     if (len == 0) {
         // pass
     }

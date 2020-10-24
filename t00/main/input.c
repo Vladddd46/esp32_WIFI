@@ -74,7 +74,7 @@ void user_input() {
             }
 
             // User pressed enter.
-            if (buf[0] == CR_ASCII_CODE) {
+            if (mx_char_in_str((char *)buf, 13)  > 0) {
                 uart_write_bytes(UART_PORT, "\n\r", 2);
                 if (!xQueueSend(global_input_queue, command_line, (200 / portTICK_PERIOD_MS)))
                     printf("Failed to send data in queue\n");
@@ -106,7 +106,14 @@ void user_input() {
 }
 
 
-char *save_spaces_in_quotes(char *input) {
+/* All spaces, which are in double quotes, 
+ *  are changed to 8 ASCII character in 
+ *  order to split input to arr by space. 
+ * Then there is function(unlock_spaces_in_quotes),
+ *  which changes back all 8 ASCII characters in quotes
+ *  to space.
+ */
+static char *save_spaces_in_quotes(char *input) {
     int num_of_dquotes = mx_count_char(input, '"');
     if (num_of_dquotes % 2 != 0) {
         uart_print(INVALID_NUM_DQUOTES, 0);
@@ -138,25 +145,48 @@ char *save_spaces_in_quotes(char *input) {
 
 
 
-char **unlock_spaces_in_quotes(char **cmd) {
+/*
+ * Changes all 8 ASCII characters in spaces.
+ * If word is in double quotes - double quotes
+ *  are deleted.
+ */
+static char **unlock_spaces_in_quotes(char **cmd) {
     int cmd_len    = mx_strarr_len(cmd);
     char **new_cmd = mx_strarr_new(cmd_len);
     char *tmp;
 
+    int len;
+    int j = 0;
+    int index;
+
     for (int i = 0; cmd[i]; ++i) {
         tmp = mx_strnew(strlen(cmd[i]));
-        for (int j = 0; cmd[i][j]; ++j) {
+
+        if (cmd[i][0] == '"' && cmd[i][strlen(cmd[i]) - 1] == '"') {
+            len = strlen(cmd[i]) - 1;
+            j = 1;
+        }
+        else {
+            len = strlen(cmd[i]);
+            j = 0;
+        }
+
+        index = 0;
+        for (; j < len; ++j) {
             if (cmd[i][j] == 8) {
-                tmp[j] = ' ';
+                tmp[index] = ' ';
             }
             else {
-                tmp[j] = cmd[i][j];
+                tmp[index] = cmd[i][j];
             }
+            index += 1;
         }
         new_cmd[i] = tmp;
     }
     return new_cmd;
 }
+
+
 
 /*
  * Receives user`s input from Queue.
@@ -199,7 +229,6 @@ void cmd_handler() {
             int cmd_len = 0;
             while(cmd[cmd_len] && cmd_len < 100) cmd_len++;
             execute(new_cmd, cmd_len);
-
             free(locked_spaces_in_quote);
             for (int i = 0; new_cmd[i]; ++i) {
                 free(new_cmd[i]);

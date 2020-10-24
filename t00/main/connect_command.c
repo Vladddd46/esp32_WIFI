@@ -30,13 +30,8 @@ static void  inline uart_print(char *msg, bool newline) {
 
 
 static int syntax_validate(char **cmd) {
-	int len = 0;
-	while(cmd[len]) {
-		len += 1;
-	}
+	int len = mx_strarr_len(cmd);
 
-	if (cmd[1])
-		printf("%d %s\n",len, cmd[1]);
 	if (len != 2 && len != 3) {
 		uart_print(CONNECT_WRONG_SYNTAX, 1);
 		return 1;
@@ -45,13 +40,13 @@ static int syntax_validate(char **cmd) {
 }
 
 
-// static void connect_status() {}
+static void connect_status() {
+	printf("connect status\n");
+}
 
 
 static void connect_to_wifi(char *ssid, char *pass) {
-	printf("llkfdl\n");
-
-
+	printf("%s  %s\n", ssid, pass);
 }
 
 
@@ -63,8 +58,8 @@ void connect_command(char **cmd) {
 	
 	char *ssid;
 	char *pass;
-	if (!strcmp(cmd[1], "status")) {
-		// connect_status();
+	if (mx_strarr_len(cmd) == 2 && !strcmp(cmd[1], "status")) {
+		connect_status();
 	}
 	else {
 		ssid = cmd[1];
