@@ -5,10 +5,10 @@
 #define BACK_SPACE    127
 #define ENTER         13
 
-#define NOT_SUPPORT_ARROWS "Arrows are not supported"
-#define PROMPT             "Enter your command : "
-#define LENGTH_ERR         "\e[31mCommand can`t be longer than 100 symbols!\e[0m"
-
+#define NOT_SUPPORT_ARROWS  "Arrows are not supported"
+#define PROMPT              "Enter your command : "
+#define LENGTH_ERR          "\e[31mCommand can`t be longer than 100 symbols!\e[0m"
+#define INVALID_NUM_DQUOTES "\e[31mInvalid number of doue quotes in command\e[0m"
 
 
 static void  inline uart_print(char *msg, bool newline) {
@@ -107,10 +107,16 @@ void user_input() {
 
 
 char *save_spaces_in_quotes(char *input) {
+    int num_of_dquotes = mx_count_char(input, '"');
+    if (num_of_dquotes % 2 != 0) {
+        uart_print(INVALID_NUM_DQUOTES, 0);
+        uart_print("\r\n", 0);
+        uart_print(PROMPT, 0);
+        return NULL;
+    }
     char *saved_spaces = mx_strnew(strlen(input));
 
     bool quote = 0;
-
     for (int i = 0; input[i]; ++i) {
         if (input[i] == '"') {
             if (quote) {
@@ -120,7 +126,6 @@ char *save_spaces_in_quotes(char *input) {
                 quote = 1;
             }
         }
-
         if (input[i] == ' ' && quote  == 1) {
             saved_spaces[i] = 8;
         }
@@ -176,7 +181,9 @@ void cmd_handler() {
         if (xQueueReceive(global_input_queue, received_input, (200 / portTICK_PERIOD_MS))) {
             for (int i = 0; i < 100; ++i) cmd[i] = NULL;
             locked_spaces_in_quote = save_spaces_in_quotes(received_input);
-
+            if (locked_spaces_in_quote == NULL) {
+                continue;
+            }
             // splitting str into arr.
             index = 0;
             p = strtok(locked_spaces_in_quote, " ");
@@ -198,7 +205,6 @@ void cmd_handler() {
                 free(new_cmd[i]);
             }
             free(new_cmd);
-
         }
     }
 }
