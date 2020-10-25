@@ -57,6 +57,6 @@ void app_main() {
     uart_init(9600);
     nvc_init();
 
-    xTaskCreate(user_input,    "user_input",    42040, NULL, 10, NULL);
-    xTaskCreate(cmd_handler,   "cmd_handler",   42040, NULL, 10, NULL);
+    xTaskCreate(user_input,    "user_input",    62040, NULL, 10, NULL);
+    xTaskCreate(cmd_handler,   "cmd_handler",   62040, NULL, 10, NULL);
 }
