@@ -21,11 +21,24 @@
 #include <strings.h>
 #include <ctype.h>
 #include "nvs_flash.h"
+#include "freertos/event_groups.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "lwip/err.h"
+#include "lwip/sys.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100
 #define UART_PORT 				UART_NUM_1
 #define NEWLINE 				"\n\r"		
+
+/* Colors */
+#define RED_TEXT    "\e[31m"
+#define BLUE_TEXT   "\e[34m"
+#define GREEN_TEXT  "\e[32m"
+#define YELLOW_TEXT "\e[33m"
+#define RESET_COLOR "\e[0m"
 
 xQueueHandle  global_input_queue;
 QueueHandle_t uart0_queue;
