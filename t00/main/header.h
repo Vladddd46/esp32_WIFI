@@ -42,6 +42,7 @@
 
 xQueueHandle  global_input_queue;
 QueueHandle_t uart0_queue;
+EventGroupHandle_t s_wifi_event_group;
 
 void user_input();
 void cmd_handler();
