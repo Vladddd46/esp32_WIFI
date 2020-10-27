@@ -6,13 +6,17 @@
  * If this AP already exists, connects to this AP.
  */
 
+
+
 void wifi_auto_connect() {
+    esp_err_t err;
     esp_wifi_start();
-    esp_err_t err = esp_wifi_scan_start(NULL, true);
+    esp_wifi_scan_start(NULL, true);
+
     uint16_t ap_num;
     wifi_ap_record_t ap_records[20];
     bzero(ap_records, 20);
-    err =  esp_wifi_scan_get_ap_records(&ap_num, ap_records);
+    esp_wifi_scan_get_ap_records(&ap_num, ap_records);
 
     nvs_handle_t my_handle;
     nvs_open(WIFI_STORAGE, NVS_READWRITE, &my_handle);

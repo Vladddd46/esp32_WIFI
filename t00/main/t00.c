@@ -43,7 +43,7 @@ static void inline wifi_initialization() {
     s_wifi_event_group = xEventGroupCreate();
     esp_netif_init();
     esp_event_loop_create_default();
-    esp_netif_t *my_ap = esp_netif_create_default_wifi_sta();
+    esp_netif_create_default_wifi_sta();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     esp_wifi_init(&cfg);
     wifi_auto_connect();
