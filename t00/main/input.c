@@ -5,7 +5,6 @@
 #define BACK_SPACE    127
 #define ENTER         13
 
-#define NOT_SUPPORT_ARROWS  "Arrows are not supported"
 #define PROMPT              "Enter your command : "
 #define LENGTH_ERR          "\e[31mCommand can`t be longer than 100 symbols!\e[0m"
 #define INVALID_NUM_DQUOTES "\e[31mInvalid number of doue quotes in command\e[0m"

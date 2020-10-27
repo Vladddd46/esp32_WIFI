@@ -7,12 +7,10 @@
 
 
 
-#define CONNECT_WRONG_SYNTAX      "Wrong syntax: connect SSID PASS; connect status"
+#define CONNECT_WRONG_SYNTAX      "Wrong syntax: connect \"SSID\" \"PASS\"; connect status"
 #define EXAMPLE_ESP_MAXIMUM_RETRY  100
 #define WIFI_CONNECTED_BIT         BIT0
 #define WIFI_FAIL_BIT              BIT1
-
-// EventGroupHandle_t s_wifi_event_group;
 
 
 
@@ -152,7 +150,8 @@ static void inline write_wifi_account_in_nvc(char *ssid, char *pass) {
 
 
 
-void connect_to_wifi(char *ssid, char *pass) {
+int connect_to_wifi(char *ssid, char *pass) {
+    int status = 1;
     esp_wifi_stop();
     vTaskDelay(10);
 
@@ -188,15 +187,17 @@ void connect_to_wifi(char *ssid, char *pass) {
         write_wifi_account_in_nvc(ssid, pass);
     } 
     else if (bits & WIFI_FAIL_BIT) {
-        uart_print("Connection Failed", 1, RED_TEXT);
+        uart_print("Connection to Wifi failed", 1, RED_TEXT);
+        status = -1;
     } 
     else {
         uart_print("Unexpected event",  1, RED_TEXT);
+        status = -1;
     }
 
-    // Deinitialization.
     esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip);
     esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id);
+    return status;
 }
 
 
