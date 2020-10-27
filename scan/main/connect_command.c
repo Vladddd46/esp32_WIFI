@@ -118,7 +118,7 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     }
      else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        uart_print("\n\rSuccess! Got IP: ", 0, GREEN_TEXT);
+        uart_print("Success! Got IP: ", 0, GREEN_TEXT);
         char got_ip[50];
         bzero(got_ip, 50);
         sprintf(got_ip, "%s", ip4addr_ntoa(&event->ip_info.ip));
@@ -128,33 +128,15 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
 }
 
 
-
-static void inline write_wifi_account_in_nvc(char *ssid, char *pass) {
-    nvs_handle_t my_handle;
-    esp_err_t err;
-    char error_msg[100];
-    bzero(error_msg, 100);
-
-    err = nvs_open(WIFI_STORAGE, NVS_READWRITE, &my_handle);
-    if (err != ESP_OK) {
-        sprintf(error_msg, "Error while opening nvc: %d", err);
-        uart_print(error_msg, 1, RED_TEXT);
-        return;
-    }
-    err = nvs_set_str(my_handle, ssid, pass);
-    if (err != ESP_OK) {
-        sprintf(error_msg, "Error while writing in nvc: %d", err);
-        uart_print(error_msg, 1, RED_TEXT);
-        return;
-    }
-    nvs_close(my_handle);
-}
-
-
-
-void connect_to_wifi(char *ssid, char *pass) {
+static void connect_to_wifi(char *ssid, char *pass) {
     esp_wifi_stop();
     vTaskDelay(10);
+	// s_wifi_event_group = xEventGroupCreate();
+ //    esp_netif_init();
+ //    esp_event_loop_create_default();
+ //    esp_netif_t *my_ap = esp_netif_create_default_wifi_sta();
+ //    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+ //    esp_wifi_init(&cfg);
 
     esp_event_handler_instance_t instance_any_id;
     esp_event_handler_instance_t instance_got_ip;
@@ -185,12 +167,9 @@ void connect_to_wifi(char *ssid, char *pass) {
 
     if (bits & WIFI_CONNECTED_BIT) {
         print_connection_log();
-        write_wifi_account_in_nvc(ssid, pass);
-    } 
-    else if (bits & WIFI_FAIL_BIT) {
+    } else if (bits & WIFI_FAIL_BIT) {
         uart_print("Connection Failed", 1, RED_TEXT);
-    } 
-    else {
+    } else {
         uart_print("Unexpected event",  1, RED_TEXT);
     }
 

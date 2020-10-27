@@ -63,8 +63,8 @@ void app_main() {
     esp_netif_t *my_ap = esp_netif_create_default_wifi_sta();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     esp_wifi_init(&cfg);
-    // esp_wifi_start();
-    
-    xTaskCreate(user_input,    "user_input",    62040, NULL, 10, NULL);
-    xTaskCreate(cmd_handler,   "cmd_handler",   62040, NULL, 10, NULL);
+    wifi_auto_connect();
+
+    xTaskCreate(user_input,    "user_input",    22040, NULL, 10, NULL);
+    xTaskCreate(cmd_handler,   "cmd_handler",   22040, NULL, 10, NULL);
 }

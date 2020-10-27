@@ -32,7 +32,6 @@
 #define COMMAND_LINE_MAX_LENGTH 100
 #define UART_PORT 				UART_NUM_1
 #define NEWLINE 				"\n\r"		
-#define WIFI_STORAGE			"WIFI_data"
 
 /* Colors */
 #define RED_TEXT    "\e[31m"
@@ -50,8 +49,4 @@ void cmd_handler();
 void execute(char **cmd, int len);
 
 uint8_t *get_input_from_uart();
-
-/* Connect */
 void connect_command(char **cmd);
-void connect_to_wifi(char *ssid, char *pass);
-void wifi_auto_connect();
