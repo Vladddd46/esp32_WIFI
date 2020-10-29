@@ -30,8 +30,7 @@ static void inline erase_char() {
 
 /*
  * Reads user`s input from UART and stores it in comman_line string.
- * When user press enter string command_line is sending to cmd_handler
- * task through queue.
+ * When user press enter string command_line is getting executed.
  */
 void user_input() {
     uint8_t command_line[COMMAND_LINE_MAX_LENGTH];
@@ -98,7 +97,7 @@ void user_input() {
              }
             free(buf);
         }
-        index    = 0;
+        index = 0;
     }
 }
 
@@ -168,7 +167,6 @@ static char **unlock_spaces_in_quotes(char **cmd) {
             len = strlen(cmd[i]);
             j = 0;
         }
-
         index = 0;
         for (; j < len; ++j) {
             if (cmd[i][j] == 8) {
@@ -183,7 +181,6 @@ static char **unlock_spaces_in_quotes(char **cmd) {
     }
     return new_cmd;
 }
-
 
 
 
@@ -205,7 +202,6 @@ void cmd_handle(char *input) {
     // splitting str into arr.
     index = 0;
     p = strtok(locked_spaces_in_quote, " ");
-
     cmd[index] = p;
     index++;
     while(p != NULL || index < 100) {
@@ -216,11 +212,10 @@ void cmd_handle(char *input) {
     // 
 
     new_cmd = unlock_spaces_in_quotes((char **)cmd);
-    int cmd_len = 0;
-    while(cmd[cmd_len] && cmd_len < 100) cmd_len++;
+    int cmd_len = mx_strarr_len(new_cmd);
     execute(new_cmd, cmd_len);
 
-
+    // Freeing all malloced memmory.
     free(locked_spaces_in_quote);
     for (int i = 0; new_cmd[i]; ++i) {
         free(new_cmd[i]);
