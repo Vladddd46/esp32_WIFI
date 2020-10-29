@@ -5,12 +5,6 @@
 
 
 
-void inline global_variables_init() {
-    global_input_queue = xQueueCreate(5, COMMAND_LINE_MAX_LENGTH);
-}
-
-
-
 static void inline nvc_init() {
     esp_err_t err;
     err = nvs_flash_init();
@@ -52,10 +46,8 @@ static void inline wifi_initialization() {
 
 
 void app_main() {
-    global_variables_init();
     uart_init(9600);
     nvc_init();
     wifi_initialization();
-    xTaskCreate(user_input,    "user_input",    22040, NULL, 10, NULL);
-    xTaskCreate(cmd_handler,   "cmd_handler",   22040, NULL, 10, NULL);
+    xTaskCreate(user_input,    "user_input",    52040, NULL, 10, NULL);
 }

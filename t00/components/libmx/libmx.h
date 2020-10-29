@@ -13,3 +13,4 @@ char **mx_strsplit(const char *str, char c);
 int mx_count_words(const char *str, char c);
 int mx_count_char(char *str, char c);
 int mx_char_in_str(char *str, char c);
+char **mx_strarr_copy(char **arr);

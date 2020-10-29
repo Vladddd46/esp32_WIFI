@@ -41,11 +41,10 @@
 #define YELLOW_TEXT "\e[33m"
 #define RESET_COLOR "\e[0m"
 
-xQueueHandle  global_input_queue;
 QueueHandle_t uart0_queue;
 EventGroupHandle_t s_wifi_event_group;
 
-void cmd_handler();
+
 void execute(char **cmd, int len);
 void user_input();
 uint8_t *get_input_from_uart();
@@ -55,3 +54,4 @@ void connect_command(char **cmd);
 void wifi_auto_connect();
 int connect_to_wifi(char *ssid, char *pass);
 
+void cmd_handle(char *input);

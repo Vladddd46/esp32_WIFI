@@ -75,9 +75,7 @@ void user_input() {
             // User pressed enter.
             if (mx_char_in_str((char *)buf, 13)  > 0) {
                 uart_write_bytes(UART_PORT, "\n\r", 2);
-                if (!xQueueSend(global_input_queue, command_line, (200 / portTICK_PERIOD_MS)))
-                    printf("Failed to send data in queue\n");
-                free(buf);
+                cmd_handle((char *)command_line);
                 break;
             }
 
@@ -103,6 +101,7 @@ void user_input() {
         index    = 0;
     }
 }
+
 
 
 /* All spaces, which are in double quotes, 
@@ -187,53 +186,45 @@ static char **unlock_spaces_in_quotes(char **cmd) {
 
 
 
-/*
- * Receives user`s input from Queue.
- * Splits user`s input in arr.
- * Calls execute function, which is in charge 
- * of executing command.
- */
-void cmd_handler() {
-    char received_input[1000];
-    bzero(received_input, 1000);
+
+void cmd_handle(char *input) {
     int index = 0;
     char *p = NULL;
-    char **cmd = (char **)malloc(100 * sizeof(char *));
-    if (cmd == NULL) {
-        printf("Malloc returned NULL. Fatal error.\n");
-        exit(1);
+    char *cmd[100];
+    for (int i = 0; i < 100; ++i) {
+        cmd[i] = NULL;
     }
     char *locked_spaces_in_quote;
     char **new_cmd;
 
-    while(1) {  
-        if (xQueueReceive(global_input_queue, received_input, (200 / portTICK_PERIOD_MS))) {
-            for (int i = 0; i < 100; ++i) cmd[i] = NULL;
-            locked_spaces_in_quote = save_spaces_in_quotes(received_input);
-            if (locked_spaces_in_quote == NULL) {
-                continue;
-            }
-            // splitting str into arr.
-            index = 0;
-            p = strtok(locked_spaces_in_quote, " ");
-            cmd[index] = p;
-            index++;
-            while(p != NULL || index < 100) {
-                p = strtok(NULL, " ");
-                cmd[index] = p;
-                index++;
-            }
-            // 
-            new_cmd = unlock_spaces_in_quotes(cmd);
-            int cmd_len = 0;
-            while(cmd[cmd_len] && cmd_len < 100) cmd_len++;
-            execute(new_cmd, cmd_len);
-            free(locked_spaces_in_quote);
-            for (int i = 0; new_cmd[i]; ++i) {
-                free(new_cmd[i]);
-            }
-            free(new_cmd);
-        }
+    locked_spaces_in_quote = save_spaces_in_quotes(input);
+    if (locked_spaces_in_quote == NULL) {
+        return;
     }
+
+    // splitting str into arr.
+    index = 0;
+    p = strtok(locked_spaces_in_quote, " ");
+
+    cmd[index] = p;
+    index++;
+    while(p != NULL || index < 100) {
+        p = strtok(NULL, " ");
+        cmd[index] =  p;
+        index++;
+    }
+    // 
+
+    new_cmd = unlock_spaces_in_quotes((char **)cmd);
+    int cmd_len = 0;
+    while(cmd[cmd_len] && cmd_len < 100) cmd_len++;
+    execute(new_cmd, cmd_len);
+
+
+    free(locked_spaces_in_quote);
+    for (int i = 0; new_cmd[i]; ++i) {
+        free(new_cmd[i]);
+    }
+    free(new_cmd);
 }
 
