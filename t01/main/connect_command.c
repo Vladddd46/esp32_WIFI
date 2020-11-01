@@ -7,12 +7,10 @@
 
 
 
-#define CONNECT_WRONG_SYNTAX      "Wrong syntax: connect SSID PASS; connect status"
+#define CONNECT_WRONG_SYNTAX      "Wrong syntax: connect \"SSID\" \"PASS\"; connect status"
 #define EXAMPLE_ESP_MAXIMUM_RETRY  100
 #define WIFI_CONNECTED_BIT         BIT0
 #define WIFI_FAIL_BIT              BIT1
-
-// EventGroupHandle_t s_wifi_event_group;
 
 
 
@@ -108,40 +106,63 @@ static void connect_status() {
 
 
 
-static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
 
-    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        esp_wifi_connect();
-    } 
-    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        if (wifi_connection_state == DISCONNECTING_WIFI_STATE) {
+            uart_print("ESP32 is diconnected from WIFI", 1, RED_TEXT);
+        }
+        else if (wifi_connection_state == CONNECTING_WIFI_STATE) {
+            uart_print("Connection to WIFI with given SSID and PASSWORD failed!", 1, RED_TEXT);
+        }
+         wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
-     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        uart_print("Success! Got IP: ", 0, GREEN_TEXT);
+        uart_print("\n\rSuccess! Got IP: ", 0, GREEN_TEXT);
         char got_ip[50];
         bzero(got_ip, 50);
         sprintf(got_ip, "%s", ip4addr_ntoa(&event->ip_info.ip));
         uart_print(got_ip, 1, NULL);
-        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+        print_connection_log();
+        wifi_connection_state = CONNECTED_WIFI_STATE;
+    }
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP) {
+        uart_print("Lost IP", 1, RED_TEXT);
+        wifi_connection_state = DISCONNECTING_WIFI_STATE;
+        esp_wifi_disconnect();
+        vTaskDelay(10);
+        wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
 }
 
 
-static void connect_to_wifi(char *ssid, char *pass) {
-    esp_wifi_stop();
-    vTaskDelay(10);
-	// s_wifi_event_group = xEventGroupCreate();
- //    esp_netif_init();
- //    esp_event_loop_create_default();
- //    esp_netif_t *my_ap = esp_netif_create_default_wifi_sta();
- //    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
- //    esp_wifi_init(&cfg);
 
-    esp_event_handler_instance_t instance_any_id;
-    esp_event_handler_instance_t instance_got_ip;
-    esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,    &event_handler, NULL, &instance_any_id);
-    esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip);
+static void inline write_wifi_account_in_nvc(char *ssid, char *pass) {
+    nvs_handle_t my_handle;
+    esp_err_t err;
+    char error_msg[100];
+    bzero(error_msg, 100);
+
+    err = nvs_open(WIFI_STORAGE, NVS_READWRITE, &my_handle);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while opening nvc: %d", err);
+        uart_print(error_msg, 1, RED_TEXT);
+        return;
+    }
+    err = nvs_set_str(my_handle, ssid, pass);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while writing in nvc: %d", err);
+        uart_print(error_msg, 1, RED_TEXT);
+        return;
+    }
+    nvs_close(my_handle);
+}
+
+
+
+int connect_to_wifi(char *ssid, char *pass) {
+    int status = 1;
 
     wifi_config_t wifi_station_config = {
         .sta = {
@@ -157,25 +178,25 @@ static void connect_to_wifi(char *ssid, char *pass) {
 
     esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_station_config);
-    esp_wifi_start();
 
-    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-            pdTRUE,
-            pdFALSE,
-            1500);
+    wifi_connection_state = DISCONNECTING_WIFI_STATE;
+    esp_wifi_disconnect();
+    vTaskDelay(10);
+    wifi_connection_state = DISCONNECTED_WIFI_STATE;
 
-    if (bits & WIFI_CONNECTED_BIT) {
-        print_connection_log();
-    } else if (bits & WIFI_FAIL_BIT) {
-        uart_print("Connection Failed", 1, RED_TEXT);
-    } else {
-        uart_print("Unexpected event",  1, RED_TEXT);
+    vTaskDelay(10);
+    uart_print("Connecting...", 1, GREEN_TEXT);
+    wifi_connection_state = CONNECTING_WIFI_STATE;
+    esp_wifi_connect();
+
+    while(wifi_connection_state != DISCONNECTED_WIFI_STATE 
+       && wifi_connection_state != CONNECTED_WIFI_STATE) {
+        vTaskDelay(1);
     }
-
-    // Deinitialization.
-    esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip);
-    esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id);
+    if (wifi_connection_state == CONNECTED_WIFI_STATE) {
+        write_wifi_account_in_nvc(ssid, pass);
+    }
+    return status;
 }
 
 

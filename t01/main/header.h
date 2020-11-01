@@ -32,6 +32,7 @@
 #define COMMAND_LINE_MAX_LENGTH 100
 #define UART_PORT 				UART_NUM_1
 #define NEWLINE 				"\n\r"		
+#define WIFI_STORAGE			"WIFI_data"
 
 /* Colors */
 #define RED_TEXT    "\e[31m"
@@ -40,13 +41,25 @@
 #define YELLOW_TEXT "\e[33m"
 #define RESET_COLOR "\e[0m"
 
-xQueueHandle  global_input_queue;
+/* Wifi Connection States */
+#define DISCONNECTED_WIFI_STATE  0
+#define DISCONNECTING_WIFI_STATE 1
+#define CONNECTING_WIFI_STATE    2
+#define CONNECTED_WIFI_STATE     3
+
+
 QueueHandle_t uart0_queue;
-EventGroupHandle_t s_wifi_event_group;
+int  wifi_connection_state;
 
-void user_input();
-void cmd_handler();
 void execute(char **cmd, int len);
-
+void user_input();
 uint8_t *get_input_from_uart();
+
+/* Connect */
 void connect_command(char **cmd);
+void wifi_auto_connect();
+int connect_to_wifi(char *ssid, char *pass);
+
+void cmd_handle(char *input);
+
+void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);

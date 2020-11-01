@@ -19,7 +19,10 @@ void execute(char **cmd, int len) {
     else if (!strcmp(cmd[0], "connect")) {
         connect_command(cmd);
     }
-    else 
+    else if (!strcmp(cmd[0], "echo")) {
+        echo_command(cmd);
+    }
+    else
         no_such_command_error();
 
     const char *prompt = "Enter your command : ";
