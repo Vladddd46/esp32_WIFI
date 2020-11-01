@@ -51,15 +51,16 @@
 QueueHandle_t uart0_queue;
 int  wifi_connection_state;
 
+uint8_t *get_input_from_uart();
 void execute(char **cmd, int len);
 void user_input();
-uint8_t *get_input_from_uart();
+void cmd_handle(char *input);
 
 /* Connect */
 void connect_command(char **cmd);
 void wifi_auto_connect();
 int connect_to_wifi(char *ssid, char *pass);
-
-void cmd_handle(char *input);
-
 void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+
+/* Echo command */
+void echo_command(char **cmd);

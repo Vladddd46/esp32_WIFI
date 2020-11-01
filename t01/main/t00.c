@@ -54,6 +54,6 @@ void app_main() {
     wifi_connection_state = DISCONNECTED_WIFI_STATE;
     nvc_init();
     wifi_initialization();
-    wifi_auto_connect();
+    // wifi_auto_connect();
     xTaskCreate(user_input,    "user_input",    52040, NULL, 10, NULL);
 }
