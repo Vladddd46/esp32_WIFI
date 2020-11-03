@@ -86,7 +86,7 @@ void echo_command(char **cmd) {
 
     struct sockaddr_in dest_addr;
     bzero(&dest_addr, sizeof(dest_addr));
-    dest_addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    dest_addr.sin_addr.s_addr = inet_addr("10.111.1.6");
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(5000);
 
@@ -105,6 +105,8 @@ void echo_command(char **cmd) {
     	printf("error %d %d\n", errno, err);
     }
    printf("successfully created\n");
+   shutdown(sock, 0);
+   close(sock);
 
 }
 

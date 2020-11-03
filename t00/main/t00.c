@@ -34,6 +34,11 @@ static void inline uart_init(int baud_rate) {
 
 // Initialize wifi routines.
 static void inline wifi_initialization() {
+    // init wifi info stuct.
+    wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
+    wifi_info.ssid     = NULL;
+    wifi_info.password = NULL;
+
     esp_netif_init();
     esp_event_loop_create_default();
     esp_netif_create_default_wifi_sta();
@@ -51,7 +56,6 @@ static void inline wifi_initialization() {
 
 void app_main() {
     uart_init(9600);
-    wifi_connection_state = DISCONNECTED_WIFI_STATE;
     nvc_init();
     wifi_initialization();
     wifi_auto_connect();

@@ -33,6 +33,7 @@
 #define UART_PORT 				UART_NUM_1
 #define NEWLINE 				"\n\r"		
 #define WIFI_STORAGE			"WIFI_data"
+#define NUM_OF_WIFI_RECONNECT   5
 
 /* Colors */
 #define RED_TEXT    "\e[31m"
@@ -48,8 +49,15 @@
 #define CONNECTED_WIFI_STATE     3
 
 
+struct wifi_info_s {
+	int  wifi_connection_state;
+	char *ssid;
+	char *password;
+};
+
+
 QueueHandle_t uart0_queue;
-int  wifi_connection_state;
+struct wifi_info_s wifi_info;
 
 void execute(char **cmd, int len);
 void user_input();

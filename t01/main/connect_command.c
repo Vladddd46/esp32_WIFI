@@ -46,6 +46,7 @@ static int syntax_validate(char **cmd) {
 }
 
 
+
 // Prints log just after connection to AP.
 static void inline print_connection_log() {
     wifi_ap_record_t ap_info;
@@ -113,9 +114,22 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
             uart_print("ESP32 is diconnected from WIFI", 1, RED_TEXT);
         }
         else if (wifi_connection_state == CONNECTING_WIFI_STATE) {
-            uart_print("Connection to WIFI with given SSID and PASSWORD failed!", 1, RED_TEXT);
+            wifi_event_sta_disconnected_t *info = event_data;
+            char msg[1000];
+            bzero(msg, 1000);
+
+            if (info->reason == 204 || info->reason == 15) {
+                sprintf(msg, "Password is wrong");
+            }
+            else if (info->reason == 201) {
+                sprintf(msg, "There is no Access Point with given SSID");
+            }
+            else {
+                sprintf(msg, "ESP32 is not connected to WiFi. Error code: %d", (int)info->reason);
+            }
+            uart_print(msg, 1, RED_TEXT);
         }
-         wifi_connection_state = DISCONNECTED_WIFI_STATE;
+        wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
@@ -214,6 +228,7 @@ void connect_command(char **cmd) {
 	else {
 		ssid = cmd[1];
 		pass = cmd[2];
+        printf("%s %s\n", ssid, pass);
 		connect_to_wifi(ssid, pass);
 	}
 }
