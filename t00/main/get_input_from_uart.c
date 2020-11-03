@@ -17,7 +17,7 @@ uint8_t *get_input_from_uart() {
     uint8_t *buf     = NULL;
     uart_event_t event;
 
-    if (xQueueReceive(uart0_queue, (void * )&event, (portTickType)portMAX_DELAY)) {
+    if (xQueueReceive(uart0_queue, (void * )&event, 10)) {
         if (event.type == UART_DATA) {
             uart_get_buffered_data_len(UART_PORT, &buf_size);
             buf =  malloc(sizeof(uint8_t) * (buf_size + 1));

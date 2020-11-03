@@ -1,7 +1,7 @@
 #include "header.h"
 
 /* @ Implementation of connect command.
- * connects to specified SSID(wifi name) with 
+ *  connects to specified SSID(wifi name) with 
  *  specified Password.
  */
 
@@ -31,7 +31,7 @@ static void inline uart_print(char *msg, bool newline, char *color) {
 
 
 
-static int syntax_validate(char **cmd) {
+static int connect_command_syntax_validate(char **cmd) {
     int len = mx_strarr_len(cmd);
 
     if (len != 2 && len != 3) {
@@ -47,7 +47,13 @@ static int syntax_validate(char **cmd) {
 
 
 
-// Prints log just after connection to AP.
+/*  @Prints log just after connection to AP.
+ *  LOG:
+ *  State: CONNECTED/DISCONNECTED
+ *  SSID: wifi_name
+ *  Channel: wifi_channel
+ *  RRSI: x dBm
+ */
 static void inline print_connection_log() {
     wifi_ap_record_t ap_info;
     ESP_ERROR_CHECK(esp_wifi_sta_get_ap_info(&ap_info));
@@ -77,6 +83,11 @@ static void inline print_connection_log() {
 
 /*
  * @ Prints status of WiFi connection.
+ *  if ESP32 is not connected to wifi => "ESP32 is not connected to WIFI"
+ *  else => log:
+ *  SSID: wifi_name
+ *  WiFi Channel: x
+ *  RRSI: x dBm
  */
 static void connect_status() {
     wifi_ap_record_t ap_info;
@@ -92,7 +103,7 @@ static void connect_status() {
     if (err == ESP_OK) {
         sprintf(ssid,     "%sSSID:%s %s",        GREEN_TEXT, RESET_COLOR, ap_info.ssid);
         sprintf(channel, "%sWiFi Channel:%s %d", GREEN_TEXT, RESET_COLOR, ap_info.primary);
-        sprintf(rssi,    "%sRRSI:%s %d",         GREEN_TEXT, RESET_COLOR, ap_info.rssi);
+        sprintf(rssi,    "%sRRSI:%s %d dBm",         GREEN_TEXT, RESET_COLOR, ap_info.rssi);
         msg = "==WiFi Status==";
         uart_print(msg,     1, GREEN_TEXT);
         uart_print(ssid,    1, NULL);
@@ -106,10 +117,12 @@ static void connect_status() {
 }
 
 
-
+/*
+ * Handles events, occured with WIFI
+ */
 void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
-
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+
         wifi_event_sta_disconnected_t *info = event_data;
         char msg[1000];
         bzero(msg, 1000);
@@ -130,12 +143,15 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
             uart_print(msg, 1, RED_TEXT);
         }
         else if (wifi_info.wifi_connection_state == CONNECTED_WIFI_STATE) {
+
+            // Delay in case any data is printed in UART.
             while (cmd_is_executing == true) {
                 vTaskDelay(1);
             }
             sprintf(msg, "ESP32 is disconnected from WiFi. Error code: %d", (int)info->reason);
             uart_print("\r\n", 0, RED_TEXT);
             uart_print(msg, 1, RED_TEXT);
+            clear_input_flag = true;
         }
         wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
@@ -160,6 +176,10 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
 
 
 
+/*
+ * Saves ssid and pass in
+ *  non-volatile storage.
+ */
 static void inline write_wifi_account_in_nvc(char *ssid, char *pass) {
     nvs_handle_t my_handle;
     esp_err_t err;
@@ -186,6 +206,9 @@ static void inline write_wifi_account_in_nvc(char *ssid, char *pass) {
 
 
 
+/*
+ * Connects to WiFi with given ssid and pass.
+ */
 int connect_to_wifi(char *ssid, char *pass) {
     int status = 1;
 
@@ -236,7 +259,7 @@ int connect_to_wifi(char *ssid, char *pass) {
 
 
 void connect_command(char **cmd) {
-    if (syntax_validate(cmd)) {
+    if (connect_command_syntax_validate(cmd)) {
         return;
     }
     
@@ -248,7 +271,6 @@ void connect_command(char **cmd) {
     else {
         ssid = cmd[1];
         pass = cmd[2];
-        printf("%s %s\n", ssid, pass);
         connect_to_wifi(ssid, pass);
     }
 }

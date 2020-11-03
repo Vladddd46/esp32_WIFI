@@ -33,7 +33,7 @@ static void inline erase_char() {
  * When user press enter string command_line is getting executed.
  */
 void user_input() {
-    // clear_input_flag = false;
+    clear_input_flag = false;
     cmd_is_executing = false;
     uint8_t command_line[COMMAND_LINE_MAX_LENGTH];
     uint8_t *buf     = NULL;
@@ -48,6 +48,11 @@ void user_input() {
         while (1) {
             buf = (uint8_t *)get_input_from_uart();
             if (buf == NULL) {
+                if (clear_input_flag == true) {
+                    uart_print(PROMPT, 0);
+                    uart_print((char *)command_line, 0);
+                    clear_input_flag = false;
+                }
                 continue;
             }
             buf_size = strlen((char *)buf);
