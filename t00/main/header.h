@@ -59,6 +59,10 @@ struct wifi_info_s {
 QueueHandle_t uart0_queue;
 struct wifi_info_s wifi_info;
 
+// clears input in case occured event printed something in UART.
+bool clear_input_flag; 
+bool cmd_is_executing;
+
 void execute(char **cmd, int len);
 void user_input();
 uint8_t *get_input_from_uart();
