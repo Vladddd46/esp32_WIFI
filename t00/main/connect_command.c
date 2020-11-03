@@ -158,8 +158,7 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
                 vTaskDelay(200);
                 n++;
             }
-            vTaskDelay(10);
-            clear_input_flag = true;
+            uart_print("Press enter...", 1, GREEN_TEXT);
         }
         wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
