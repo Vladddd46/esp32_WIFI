@@ -132,7 +132,7 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
         }
         else if (wifi_info.wifi_connection_state == CONNECTING_WIFI_STATE) {
             if (info->reason == 204 || info->reason == 15) {
-                sprintf(msg, "Password is wrong");
+                sprintf(msg, "Error while connection. Maybe password was wrong");
             }
             else if (info->reason == 201) {
                 sprintf(msg, "There is no Access Point with given SSID");
@@ -151,6 +151,14 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
             sprintf(msg, "ESP32 is disconnected from WiFi. Error code: %d", (int)info->reason);
             uart_print("\r\n", 0, RED_TEXT);
             uart_print(msg, 1, RED_TEXT);
+            int n = 0;
+            while(n < NUM_OF_WIFI_RECONNECT) {
+                uart_print("trying to reconnect...", 1, RED_TEXT);
+                esp_wifi_connect();
+                vTaskDelay(200);
+                n++;
+            }
+            vTaskDelay(10);
             clear_input_flag = true;
         }
         wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
