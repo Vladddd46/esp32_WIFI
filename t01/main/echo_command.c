@@ -99,12 +99,25 @@ void echo_command(char **cmd) {
     	printf("==>%d\n", sock);
     }
 
+    uint8_t b[32];
+    bzero(b, 32);
+    b[0] = 8;
+    b[1] = 0;
+
 
     int err = connect(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
     if (err != 0) {
     	printf("error %d %d\n", errno, err);
     }
-   printf("successfully created\n");
+    else {
+   		printf("socket successfully created\n");
+   	}
+   	err = send(sock, "PING #0", strlen("PING #0"), 0);
+   	char rx_buffer[128];
+   	bzero(rx_buffer, 128);
+   	int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+   	printf(">>%s\n", rx_buffer);
+
    shutdown(sock, 0);
    close(sock);
 
