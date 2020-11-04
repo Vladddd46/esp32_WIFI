@@ -1,4 +1,9 @@
 #include "header.h"
+#include "lwip/err.h"
+#include "lwip/sockets.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+
 
 #define UART_TX_PIN 17
 #define UART_RX_PIN 16

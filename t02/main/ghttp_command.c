@@ -4,6 +4,11 @@
 #include "lwip/inet.h"
 #include "lwip/ip4_addr.h"
 #include "lwip/dns.h"
+#include "lwip/err.h"
+#include "lwip/sockets.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+
 
 /* @Sends http GET request.
  * Resolves url with help of dns.
@@ -36,13 +41,10 @@ static void inline uart_print(char *msg, bool newline, char *color) {
 
 
 static void dns_found(char *name, ip_addr_t *ipaddr, void *callback_arg) {
-	printf(">>%s\n", name);
     if (ipaddr == NULL) {
-    	printf("!%s\n", name);
         DNSFound = false;
     }
     else {
-    	printf("2.%s\n", name);
 	    ip_Addr = *ipaddr;
 	    DNSFound = true;
     }
@@ -55,7 +57,6 @@ static void dns_found(char *name, ip_addr_t *ipaddr, void *callback_arg) {
  * In case of no ip associated with such host, return NULL.
  */
 static char *resolve_ip_by_host_name(char *host_name) {
-	printf("%s\n", host_name);
 	dns_gethostbyname(host_name, &ip_Addr, dns_found, NULL);
 	int num_of_ms = 0;
     while(!DNSFound) {
@@ -66,7 +67,6 @@ static char *resolve_ip_by_host_name(char *host_name) {
         vTaskDelay(1);
     }
 
-    printf("%s\n", host_name);
     char ip_adress[32];
     bzero(ip_adress, 32);
     char *res;
@@ -82,6 +82,44 @@ static char *resolve_ip_by_host_name(char *host_name) {
 	}
 	DNSFound = false;
 	return NULL;
+}
+
+void send_http_get(char *path, char *ip) {
+	struct sockaddr_in dest_addr;
+    bzero(&dest_addr, sizeof(dest_addr));
+    dest_addr.sin_addr.s_addr = inet_addr("10.111.1.6");
+    dest_addr.sin_family = AF_INET;
+    dest_addr.sin_port = htons(5000);
+
+    int sock =  socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+
+    if (sock < 0) {
+    	printf("++++%d\n", errno);
+    }
+    else {
+    	printf("==>%d\n", sock);
+    }
+
+
+    int err = connect(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+    if (err != 0) {
+    	printf("error %d %d\n", errno, err);
+    }
+    else {
+   		printf("socket successfully created\n");
+   	}
+
+   	char *p = "GET /\nHost: google.com\n";
+   	send(sock, p, strlen(p), 0);
+   	char rx_buffer[2000];
+   	bzero(rx_buffer, 2000);
+
+
+   	int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+   	printf(">>%s\n", rx_buffer);
+
+   shutdown(sock, 0);
+   close(sock);
 }
 
 /* @ Splits url into {host_name, path/to/document}
@@ -129,6 +167,7 @@ void ghttp_command(char **cmd, int len) {
 	}
 
 
+	send_http_get(splited_url[1], ip_adress);
 
 	// freeing memory.
 	for (int i = 0; splited_url[i] ; ++i) {
