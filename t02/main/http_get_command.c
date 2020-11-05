@@ -148,7 +148,7 @@ static int inline http_get_syntax_validate(int cmd_len) {
     return 0;
 }
 
-void ghttp_command(char **cmd, int len) {
+void http_get_command(char **cmd, int len) {
     // syntax validation
 	if (http_get_syntax_validate(len)) {return;}
 
@@ -158,7 +158,7 @@ void ghttp_command(char **cmd, int len) {
 
     uart_print(ip_adress, 1, 0, GREEN_TEXT);
     
-    int sock = create_connected_socket("10.111.1.12", 5000);
+    int sock = create_connected_socket("192.168.0.104", 5000);
     if (sock == -1) {return;}
 
 	send_http_get(sock, splited_url[1]);
