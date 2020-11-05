@@ -19,25 +19,6 @@
 #define GHTTP_WRONG_SYNTAX "Wrong syntax: ghttp url/must/be/here"
 #define NO_SUCH_HOST 	   "Host not found"
 
-static void inline uart_print(char *msg, bool newline, char *color) {
-    if (color != NULL) {
-        uart_write_bytes(UART_PORT, color, strlen(color)); 
-    }
-    if (newline) { 
-        uart_write_bytes(UART_PORT, "\r\n", 2);
-    }
-
-    uart_write_bytes(UART_PORT, msg, strlen(msg));  
-
-    if (newline) { 
-        uart_write_bytes(UART_PORT, "\r\n", 2);
-    }
-
-    if (color != NULL) {
-        uart_write_bytes(UART_PORT, RESET_COLOR, strlen(RESET_COLOR)); 
-    }
-}
-
 
 
 static void dns_found(char *name, ip_addr_t *ipaddr, void *callback_arg) {
@@ -81,45 +62,43 @@ static char *resolve_ip_by_host_name(char *host_name) {
 		return res;
 	}
 	DNSFound = false;
+    uart_print(NO_SUCH_HOST, 0, 1, RED_TEXT);
 	return NULL;
 }
 
-void send_http_get(char *path, char *ip) {
-	struct sockaddr_in dest_addr;
+
+// Sends simple http request.
+static void inline send_http_get(int sock, char *path) {
+    char get_request[1000];
+    bzero(get_request, 1000);
+    sprintf(get_request, "GET /%s HTTP/1.0\r\n\r\n", path);
+   	send(sock, get_request, strlen(get_request), 0);
+}
+
+
+
+// Creates socket, connected to `ip` with `port`
+static int create_connected_socket(char *ip, int port) {
+    struct sockaddr_in dest_addr;
     bzero(&dest_addr, sizeof(dest_addr));
-    dest_addr.sin_addr.s_addr = inet_addr("10.111.1.6");
+    dest_addr.sin_addr.s_addr = inet_addr(ip);
     dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port = htons(5000);
+    dest_addr.sin_port = htons(port);
 
     int sock =  socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-
     if (sock < 0) {
-    	printf("++++%d\n", errno);
+        uart_print("Unable to create socket...", 1, 1, RED_TEXT);
+        printf("Socket was not created. Errno: %d\n", errno);
+        return -1;
     }
-    else {
-    	printf("==>%d\n", sock);
-    }
-
 
     int err = connect(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
     if (err != 0) {
-    	printf("error %d %d\n", errno, err);
+        uart_print("Host is unavailable", 1, 1, RED_TEXT);
+        return -1;
     }
-    else {
-   		printf("socket successfully created\n");
-   	}
+    return sock;
 
-   	char *p = "GET /\nHost: google.com\n";
-   	send(sock, p, strlen(p), 0);
-   	char rx_buffer[2000];
-   	bzero(rx_buffer, 2000);
-
-
-   	int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
-   	printf(">>%s\n", rx_buffer);
-
-   shutdown(sock, 0);
-   close(sock);
 }
 
 /* @ Splits url into {host_name, path/to/document}
@@ -151,23 +130,39 @@ static char **split_url(char *url) {
 	return arr;
 }
 
-void ghttp_command(char **cmd, int len) {
-	if (len != 2) {
-		uart_print(GHTTP_WRONG_SYNTAX, 1, RED_TEXT);
-		return;
-	}
-	char **splited_url = split_url(cmd[1]);
-    char *ip_adress = resolve_ip_by_host_name(splited_url[0]);
 
-    if (ip_adress != NULL) {
-    	uart_print(ip_adress,    1, GREEN_TEXT);
+
+static char *receive_response(int sock) {
+    char rx_buffer[500];
+    bzero(rx_buffer, 500);
+    recv(sock, rx_buffer, 200, 0);
+    uart_print(rx_buffer, 1, 1, GREEN_TEXT);
+    return NULL;
+}
+
+static int inline http_get_syntax_validate(int cmd_len) {
+    if (cmd_len != 2) {
+        uart_print(GHTTP_WRONG_SYNTAX, 1, 0, RED_TEXT);
+        return 1;
     }
-    else {
-		uart_print(NO_SUCH_HOST, 1, RED_TEXT);
-	}
+    return 0;
+}
 
+void ghttp_command(char **cmd, int len) {
+    // syntax validation
+	if (http_get_syntax_validate(len)) {return;}
 
-	send_http_get(splited_url[1], ip_adress);
+	char **splited_url = split_url(cmd[1]);
+    char *ip_adress    = resolve_ip_by_host_name(splited_url[0]);
+    if (ip_adress == NULL) {return;}
+
+    uart_print(ip_adress, 1, 0, GREEN_TEXT);
+    
+    int sock = create_connected_socket("10.111.1.12", 5000);
+    if (sock == -1) {return;}
+
+	send_http_get(sock, splited_url[1]);
+    char *server_respone = receive_response(sock);
 
 	// freeing memory.
 	for (int i = 0; splited_url[i] ; ++i) {
@@ -177,6 +172,9 @@ void ghttp_command(char **cmd, int len) {
 	if (ip_adress != NULL) {
 		free(ip_adress);
 	}
+    // close connection with server
+    shutdown(sock, 0);
+    close(sock);
 }
 
 

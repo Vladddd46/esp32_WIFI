@@ -67,3 +67,4 @@ void app_main() {
     wifi_auto_connect();
     xTaskCreate(user_input,    "user_input",    52040, NULL, 10, NULL);
 }
+

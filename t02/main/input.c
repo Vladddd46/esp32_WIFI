@@ -10,13 +10,6 @@
 #define INVALID_NUM_DQUOTES "\e[31mInvalid number of doue quotes in command\e[0m"
 
 
-static void  inline uart_print(char *msg, bool newline) {
-    if (newline) uart_write_bytes(UART_PORT, "\r\n", 2);
-    uart_write_bytes(UART_PORT, msg, strlen(msg));  
-    if (newline) uart_write_bytes(UART_PORT, "\r\n", 2);
-}
-
-
 
 static void inline erase_char() {
     char c = 8;
@@ -42,15 +35,15 @@ void user_input() {
     char    analyzed_buffer[1000];
     int     indx = 0;
 
-    uart_print(PROMPT, 0);
+    uart_print(PROMPT, 0, 0, NULL);
     while(1) {
         bzero(command_line, COMMAND_LINE_MAX_LENGTH);
         while (1) {
             buf = (uint8_t *)get_input_from_uart();
             if (buf == NULL) {
                 if (clear_input_flag == true) {
-                    uart_print(PROMPT, 0);
-                    uart_print((char *)command_line, 0);
+                    uart_print(PROMPT, 0, 0, NULL);
+                    uart_print((char *)command_line, 0, 0, NULL);
                     clear_input_flag = false;
                 }
                 continue;
@@ -59,8 +52,8 @@ void user_input() {
 
             // Too long buf.
             if (buf_size > 100 || index >= 100) {
-                uart_print(LENGTH_ERR, 1);
-                uart_print(PROMPT, 0);
+                uart_print(LENGTH_ERR, 1, 1, NULL);
+                uart_print(PROMPT, 0, 0, NULL);
                 free(buf);
                 break;
             }
@@ -97,7 +90,7 @@ void user_input() {
             }
 
             // Displaying input in console.
-            uart_print((char *)analyzed_buffer, 0);
+            uart_print((char *)analyzed_buffer, 0, 0, NULL);
             for (int i = 0; analyzed_buffer[i]; ++i) {
                 if (analyzed_buffer[i] != BACK_SPACE) {
                     command_line[index] = analyzed_buffer[i];
@@ -122,9 +115,9 @@ void user_input() {
 static char *save_spaces_in_quotes(char *input) {
     int num_of_dquotes = mx_count_char(input, '"');
     if (num_of_dquotes % 2 != 0) {
-        uart_print(INVALID_NUM_DQUOTES, 0);
-        uart_print("\r\n", 0);
-        uart_print(PROMPT, 0);
+        uart_print(INVALID_NUM_DQUOTES, 0, 0, NULL);
+        uart_print("\r\n", 0, 0, NULL);
+        uart_print(PROMPT, 0, 0, NULL);
         return NULL;
     }
     char *saved_spaces = mx_strnew(strlen(input));
