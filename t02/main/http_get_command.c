@@ -8,12 +8,13 @@
 #include "lwip/sockets.h"
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#include <sys/ioctl.h>
 
 /* @Sends http GET request.
  * Resolves url with help of dns.
  * Forms http get packet.
  * Sends packet and receives response.
+ * Prints response.
  */
 
 #define GHTTP_WRONG_SYNTAX "Wrong syntax: ghttp url/must/be/here"
@@ -30,6 +31,7 @@ static void dns_found(char *name, ip_addr_t *ipaddr, void *callback_arg) {
 	    DNSFound = true;
     }
 }
+
 
 
 /*
@@ -67,11 +69,18 @@ static char *resolve_ip_by_host_name(char *host_name) {
 }
 
 
+
 // Sends simple http request.
 static void inline send_http_get(int sock, char *path) {
     char get_request[1000];
     bzero(get_request, 1000);
-    sprintf(get_request, "GET /%s HTTP/1.0\r\n\r\n", path);
+
+    if (strlen(path) == 0) {
+        sprintf(get_request, "GET / HTTP/1.0\r\n\r\n");
+    }
+    else {
+        sprintf(get_request, "GET /%s HTTP/1.0\r\n\r\n", path);
+    }
    	send(sock, get_request, strlen(get_request), 0);
 }
 
@@ -100,6 +109,8 @@ static int create_connected_socket(char *ip, int port) {
     return sock;
 
 }
+
+
 
 /* @ Splits url into {host_name, path/to/document}
  * Takes url as argument: host_name/path/to/document.
@@ -132,13 +143,44 @@ static char **split_url(char *url) {
 
 
 
-static char *receive_response(int sock) {
-    char rx_buffer[500];
-    bzero(rx_buffer, 500);
-    recv(sock, rx_buffer, 200, 0);
-    uart_print(rx_buffer, 1, 1, GREEN_TEXT);
-    return NULL;
+/* @ Receives response from server and prints it on UART.
+ * Receiving response and printing are done in one function
+ * because of lack of memmory on esp32.
+ */
+static void receive_response(int sock) {
+    char rx_buffer[5000];
+    bzero(rx_buffer, 5000);
+
+    char *headers = "HEADERS:" ;
+    char *lines   = "----------------------";
+    char *payload = "PAYLOAD:";
+    char *color     = YELLOW_TEXT;
+
+    bool print_headers = true;
+    bool print_payload = true;
+
+    while (recv(sock, rx_buffer, 4449, 0)) {
+        if (print_headers == true) {
+            uart_print(headers, 1, 0, color);
+            uart_print(lines,   1, 1, color);
+            print_headers = false;
+        }
+        for (int i = 0; rx_buffer[i]; ++i) {
+            if (rx_buffer[i] == '<' && print_payload == true) {
+                color = GREEN_TEXT;
+                uart_print(payload, 1, 0, color);
+                uart_print(lines,   1, 1, color);
+                print_payload = false;
+            }
+            char tmp = rx_buffer[i];
+            uart_print(&tmp, 0, 0, color);
+        }
+        bzero(rx_buffer, 5000);
+    }
+    uart_print("\n\r", 0, 0, NULL);
 }
+
+
 
 static int inline http_get_syntax_validate(int cmd_len) {
     if (cmd_len != 2) {
@@ -148,21 +190,24 @@ static int inline http_get_syntax_validate(int cmd_len) {
     return 0;
 }
 
+
+
 void http_get_command(char **cmd, int len) {
     // syntax validation
 	if (http_get_syntax_validate(len)) {return;}
-
 	char **splited_url = split_url(cmd[1]);
     char *ip_adress    = resolve_ip_by_host_name(splited_url[0]);
-    if (ip_adress == NULL) {return;}
 
-    uart_print(ip_adress, 1, 0, GREEN_TEXT);
-    
-    int sock = create_connected_socket("192.168.0.104", 5000);
-    if (sock == -1) {return;}
-
-	send_http_get(sock, splited_url[1]);
-    char *server_respone = receive_response(sock);
+    if (ip_adress != NULL) {
+        int sock = create_connected_socket(ip_adress, 80);
+        if (sock != -1) {
+    	    send_http_get(sock, splited_url[1]);
+            receive_response(sock);
+            // close connection with server
+            shutdown(sock, 0);
+            close(sock);
+        }
+    }
 
 	// freeing memory.
 	for (int i = 0; splited_url[i] ; ++i) {
@@ -172,9 +217,6 @@ void http_get_command(char **cmd, int len) {
 	if (ip_adress != NULL) {
 		free(ip_adress);
 	}
-    // close connection with server
-    shutdown(sock, 0);
-    close(sock);
 }
 
 
