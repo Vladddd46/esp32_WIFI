@@ -45,3 +45,4 @@ void wifi_auto_connect() {
     }
     nvs_close(my_handle);
 }
+

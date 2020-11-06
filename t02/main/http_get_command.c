@@ -107,7 +107,6 @@ static int create_connected_socket(char *ip, int port) {
         return -1;
     }
     return sock;
-
 }
 
 

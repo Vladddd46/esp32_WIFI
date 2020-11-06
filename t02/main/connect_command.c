@@ -111,7 +111,7 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
         bzero(msg, 1000);
 
         if (wifi_info.wifi_connection_state == DISCONNECTING_WIFI_STATE) {
-            uart_print("ESP32 is diconnected from WIFI", 1, 1, RED_TEXT);
+            uart_print("ESP32 is diconnected from WIFI", 0, 0, RED_TEXT);
         }
         else if (wifi_info.wifi_connection_state == CONNECTING_WIFI_STATE) {
             if (info->reason == 204 || info->reason == 15) {
@@ -136,7 +136,7 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
             uart_print(msg, 0, 1, RED_TEXT);
             int n = 0;
             while(n < NUM_OF_WIFI_RECONNECT) {
-                uart_print("trying to reconnect...", 1, 1, RED_TEXT);
+                uart_print("trying to reconnect...", 0, 1, RED_TEXT);
                 esp_wifi_connect();
                 vTaskDelay(200);
                 n++;
@@ -187,7 +187,7 @@ static void inline write_wifi_account_in_nvc(char *ssid, char *pass) {
         sprintf(error_msg, "Error while writing in nvc: %d", err);
         uart_print(error_msg, 0, 1, RED_TEXT);
         if (ESP_ERR_NVS_KEY_TOO_LONG == err) {
-            uart_print("SSID name is too long", 1, 1, RED_TEXT);
+            uart_print("SSID name is too long", 0, 1, RED_TEXT);
         }
         return;
     }
