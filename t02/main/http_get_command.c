@@ -25,7 +25,7 @@
 /*
  * Takes host_name as argument and returns
  * ip address of this host.
- * In case of no ip associated with such host, return NULL.
+ * In case of no ip associated with such host, returns NULL.
  */
 static char *resolve_ip_by_host_name(char *host_name) {
     struct hostent *ghost = gethostbyname(host_name);
@@ -146,6 +146,9 @@ static void receive_response(int sock) {
             }
             char tmp = rx_buffer[i];
             uart_print(&tmp, 0, 0, color);
+            if (tmp == '\n') {
+                uart_print("\r", 0, 0, color);
+            }
         }
         bzero(rx_buffer, 5000);
     }
