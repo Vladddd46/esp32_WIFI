@@ -17,7 +17,7 @@
  * Prints response.
  */
 
-#define GHTTP_WRONG_SYNTAX "Wrong syntax: ghttp url/must/be/here"
+#define HTTP_GET_WRONG_SYNTAX "Wrong syntax: http_get url/must/be/here"
 #define NO_SUCH_HOST 	   "Host not found"
 
 
@@ -159,7 +159,7 @@ static void receive_response(int sock) {
 
 static int inline http_get_syntax_validate(int cmd_len) {
     if (cmd_len != 2) {
-        uart_print(GHTTP_WRONG_SYNTAX, 1, 0, RED_TEXT);
+        uart_print(HTTP_GET_WRONG_SYNTAX, 0, 1, RED_TEXT);
         return 1;
     }
     return 0;

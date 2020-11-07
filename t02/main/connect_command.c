@@ -18,11 +18,11 @@ static int connect_command_syntax_validate(char **cmd) {
     int len = mx_strarr_len(cmd);
 
     if (len != 2 && len != 3) {
-        uart_print(CONNECT_WRONG_SYNTAX, 1, 1, RED_TEXT);
+        uart_print(CONNECT_WRONG_SYNTAX, 0, 1, RED_TEXT);
         return 1;
     }
     if (len == 2 && strcmp(cmd[1], "status") != 0) {
-        uart_print(CONNECT_WRONG_SYNTAX, 1, 1, RED_TEXT);
+        uart_print(CONNECT_WRONG_SYNTAX, 0, 1, RED_TEXT);
         return 1;
     }
     return 0;
