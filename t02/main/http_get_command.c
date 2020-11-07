@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-
+#include <netdb.h>
 /* @Sends http GET request.
  * Resolves url with help of dns.
  * Forms http get packet.
@@ -22,49 +22,22 @@
 
 
 
-static void dns_found(char *name, ip_addr_t *ipaddr, void *callback_arg) {
-    if (ipaddr == NULL) {
-        DNSFound = false;
-    }
-    else {
-	    ip_Addr = *ipaddr;
-	    DNSFound = true;
-    }
-}
-
-
-
 /*
  * Takes host_name as argument and returns
  * ip address of this host.
  * In case of no ip associated with such host, return NULL.
  */
 static char *resolve_ip_by_host_name(char *host_name) {
-	dns_gethostbyname(host_name, &ip_Addr, dns_found, NULL);
-	int num_of_ms = 0;
-    while(!DNSFound) {
-        if (num_of_ms == 100) {
-            break;
+    struct hostent *ghost = gethostbyname(host_name);
+    if (ghost != NULL) {
+        char *ip = inet_ntoa(*(struct in_addr*)ghost->h_addr);
+        if (ip != NULL) {
+            return mx_string_copy(ip);
         }
-        num_of_ms +=1;
-        vTaskDelay(1);
     }
-
-    char ip_adress[32];
-    bzero(ip_adress, 32);
-    char *res;
-    if (DNSFound) {
-		sprintf(ip_adress, "%i.%i.%i.%i", 
-                ip4_addr1(&ip_Addr.u_addr.ip4), 
-                ip4_addr2(&ip_Addr.u_addr.ip4), 
-                ip4_addr3(&ip_Addr.u_addr.ip4), 
-                ip4_addr4(&ip_Addr.u_addr.ip4));
-		res = mx_string_copy(ip_adress);
-		DNSFound = false;
-		return res;
-	}
-	DNSFound = false;
-    uart_print(NO_SUCH_HOST, 0, 1, RED_TEXT);
+    else {
+        uart_print(NO_SUCH_HOST, 0, 1, RED_TEXT);
+    }
 	return NULL;
 }
 
