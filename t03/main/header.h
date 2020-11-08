@@ -27,20 +27,16 @@
 #include "esp_log.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "lwip/sockets.h"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include "utils.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100
-#define UART_PORT 				UART_NUM_1
 #define NEWLINE 				"\n\r"		
 #define WIFI_STORAGE			"WIFI_data"
 #define NUM_OF_WIFI_RECONNECT   5
-
-/* Colors */
-#define RED_TEXT    "\e[31m"
-#define BLUE_TEXT   "\e[34m"
-#define GREEN_TEXT  "\e[32m"
-#define YELLOW_TEXT "\e[33m"
-#define RESET_COLOR "\e[0m"
 
 /* Wifi Connection States */
 #define DISCONNECTED_WIFI_STATE  0
@@ -82,5 +78,4 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
 
 void http_get_command(char **cmd, int len);
 
-void uart_print(char *msg, bool newline_1, bool newline_2, char *color);
 
