@@ -24,6 +24,7 @@ void wifi_auto_connect() {
     char *ap_ssid;
     char *password;
     for(int i = 0; i < ap_num; i++) {
+        if ((char *)ap_records[i].ssid == NULL) {continue;}
         ap_ssid = mx_string_copy((char *)ap_records[i].ssid);
         size_t required_size;
         nvs_get_str(my_handle, ap_ssid, NULL, &required_size);

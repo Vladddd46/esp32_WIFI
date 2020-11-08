@@ -55,7 +55,6 @@ static void inline wifi_initialization() {
 
 
 void app_main() {
-    DNSFound = false;
     uart_init(9600);
     nvc_init();
     wifi_initialization();

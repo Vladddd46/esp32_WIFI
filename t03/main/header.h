@@ -60,7 +60,6 @@ bool clear_input_flag;
 bool cmd_is_executing;
 
 /* dns */
-bool DNSFound;
 ip_addr_t ip_Addr;
 
 void execute(char **cmd, int len);
