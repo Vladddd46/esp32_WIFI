@@ -5,9 +5,9 @@
  * to be executed.
  */
 
-static void no_such_command_error() {
-    char *msg = "\e[31mNo such command.\e[36mWrite \e[32mhelp \e[36mto list all supported commands.\e[0m\n\r";
-    uart_write_bytes(UART_PORT, msg, strlen(msg));
+static void inline no_such_command_error() {
+    uart_print("No such command.", 0, 0, RED_TEXT);
+    uart_print("Write help to list all supported commands.", 0, 1, BLUE_TEXT);
 }
 
 
@@ -22,8 +22,9 @@ void execute(char **cmd, int len) {
     else if (!strcmp(cmd[0], "http_get")) {
         http_get_command(cmd, len);
     }
-    else 
+    else  {
         no_such_command_error();
+    }
 
     const char *prompt = "Enter your command : ";
     uart_write_bytes(UART_PORT, prompt, strlen(prompt));
