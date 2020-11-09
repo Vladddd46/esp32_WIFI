@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "utils.h"
+#include "get_dht11_data.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100
@@ -54,6 +55,7 @@ struct wifi_info_s {
 
 QueueHandle_t uart0_queue;
 struct wifi_info_s wifi_info;
+QueueHandle_t dht11_data_queue;
 
 // clears input in case occured event printed something in UART.
 bool clear_input_flag; 
@@ -76,7 +78,7 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
 void http_get_command(char **cmd, int len);
 
 void tehu_command(char **cmd, int len);
-
+void dht11_monitor();
 
 
 

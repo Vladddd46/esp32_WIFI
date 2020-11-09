@@ -2,7 +2,9 @@
 
 #define TEHU_WRONG_SYNTAX "Wrong syntax:\n\rtehu start ip_address port\n\rtehu stop"
 
-static int inline tehu_syntax_validator(char **cmd, int len) {
+
+
+static int tehu_syntax_validator(char **cmd, int len) {
 	if (len != 2 && len != 4) {
 		uart_print(TEHU_WRONG_SYNTAX, 0, 1, RED_TEXT);
 		return 1;
@@ -24,7 +26,7 @@ static int inline tehu_syntax_validator(char **cmd, int len) {
 				uart_print(TEHU_WRONG_SYNTAX, 0, 1, RED_TEXT);
 				return 1;
 			}
-			else if () {
+			else if (cmd[2][i] == '.' && cmd[2][i + 1] == '.') {
 				uart_print(TEHU_WRONG_SYNTAX, 0, 1, RED_TEXT);
 				return 1;
 			}
@@ -36,5 +38,13 @@ static int inline tehu_syntax_validator(char **cmd, int len) {
 void tehu_command(char **cmd, int len) {
 	if (tehu_syntax_validator(cmd, len)) {return;}
 
-	
+	char data[100];
+	bzero(data, 100);
+	if (len == 2) {
+		sprintf(data, "stop");
+	}
+	else {
+		sprintf(data, "%s %s", cmd[2], cmd[3]);
+	}
+	xQueueSend(dht11_data_queue,(void *)data, (TickType_t)0);
 }

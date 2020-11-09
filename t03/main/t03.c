@@ -60,5 +60,6 @@ void app_main() {
     wifi_initialization();
     wifi_auto_connect();
     xTaskCreate(user_input,    "user_input",    52040, NULL, 10, NULL);
+    xTaskCreate(dht11_monitor, "dht11_monitor", 12040, NULL, 10, NULL);
 }
 
