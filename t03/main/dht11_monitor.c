@@ -61,15 +61,34 @@ static char *dht11_data_to_json(char *data) {
 
 
 
-// static int send_dht11_data_to_server(char *ip, int port) {
-//     int sock = -1;
+/* @ Gets data from dht11 and sends it to server with ip and port.
+ *  1. Creates socket with ip, port.
+ *  2. Gets data from dht11.
+ *  3. Converts data into json format.
+ *  4. Sends data.
+ *  5. Closes socket.
+ */
+static bool send_dht11_data_to_server(char *ip, int port) {
+    if (ip == NULL || port == -1) {return false;}
+    int sock   = create_connected_socket(ip, port);
+    if (sock == -1) {return false;}
 
-// }
+    char *data = get_dht11_data(DHT11_POWER, DHT11_DATA); 
+    if (data != NULL) {
+        char *send_data = dht11_data_to_json(data);
+        if (send_data != NULL) {
+            send(sock, send_data, strlen(send_data), 0);
+            free(send_data);
+        }
+        free(data);
+    }
+    close(sock);
+    return true;
+}
 
 
-/*
- * Gets data from  dht11 temperature/humidity sensor each 5 seconds.
- * Sends got data into dht11_data_queue.
+/*  @ Gets data from dht11 sensor and sends it to server.
+ *  Sends only if is_send == true.
  */
 void dht11_monitor() {
     dht11_data_queue = xQueueCreate(1, 100);
@@ -77,13 +96,11 @@ void dht11_monitor() {
     bzero(queue_data, 100);
 
     bool is_send = false;
-    char *data = NULL;
 
-    char *ip_to_send;
-    int  port_to_send;
+    char *ip_to_send  = NULL;
+    int  port_to_send = -1;
     char *tmp_port;
 
-    int sock = -1;
     while(true) {
         if (xQueueReceive(dht11_data_queue, (void *)queue_data, (TickType_t)10)) {
             if (!strcmp(queue_data, "stop")) {
@@ -104,29 +121,9 @@ void dht11_monitor() {
                 is_send      = true;
             }
         }
-
         if (is_send == true) {
-            sock = create_connected_socket(ip_to_send, port_to_send);
-            if (sock == -1) {
+            if (send_dht11_data_to_server(ip_to_send, port_to_send) == false) {
                 is_send = false;
-                continue;
-            }
-
-            data = get_dht11_data(DHT11_POWER, DHT11_DATA); 
-            if (data != NULL) {
-                char *send_data = dht11_data_to_json(data);
-                if (send_data != NULL) {
-                    send(sock, send_data, strlen(send_data), 0);
-                    free(send_data);
-                }
-            }
-
-            if (data != NULL) {
-        	   free(data);
-            }
-
-            if (sock != -1) {
-                close(sock);
             }
         }
         vTaskDelay(350);

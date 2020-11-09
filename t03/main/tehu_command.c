@@ -53,9 +53,14 @@ void tehu_command(char **cmd, int len) {
 	bzero(data, 100);
 	if (len == 2) {
 		sprintf(data, "stop");
+		uart_print("Sending data from dht11 stopped", 0, 1, BLUE_TEXT);
 	}
 	else {
 		sprintf(data, "%s %s", cmd[2], cmd[3]);
+		uart_print("Start sending data from dht11 to server>", 0, 0, GREEN_TEXT);
+		uart_print(cmd[2], 0, 0, GREEN_TEXT);
+		uart_print(":",    0, 0, GREEN_TEXT);
+		uart_print(cmd[3], 0, 1, GREEN_TEXT);
 	}
 	xQueueSend(dht11_data_queue, (void *)data, (TickType_t)0);
 }
