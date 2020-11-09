@@ -72,9 +72,13 @@ void wifi_auto_connect();
 int connect_to_wifi(char *ssid, char *pass);
 
 void cmd_handle(char *input);
-
 void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
-
 void http_get_command(char **cmd, int len);
+
+void tehu_command(char **cmd, int len);
+
+
+
+
 
 
