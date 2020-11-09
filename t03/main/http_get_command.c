@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
+
 /* @Sends http GET request.
  * Resolves url with help of dns.
  * Forms http get packet.
