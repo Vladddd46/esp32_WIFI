@@ -1,3 +1,4 @@
+#pragma once
 #include "driver/uart.h"
 #include <stdio.h>
 #include <stdlib.h>

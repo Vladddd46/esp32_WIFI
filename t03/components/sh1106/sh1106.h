@@ -1,5 +1,4 @@
-#ifndef _SH1106_H_
-#define _SH1106_H_
+#pragma once
 #include "driver/i2c.h"
 #include <unistd.h>
 #include <stdlib.h>
@@ -42,4 +41,3 @@ void init_display(sh1106_t *display);
 void init_i2c_driver();
 void sh1106_contrast(sh1106_t *display, uint8_t value);
 void screen_print(sh1106_t **display, char *str, int page, int position, int size);
-#endif
