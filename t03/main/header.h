@@ -34,6 +34,8 @@
 #include "utils.h"
 #include "get_dht11_data.h"
 #include "http_header.h"
+#include "esp_tls.h"
+#include "esp_crt_bundle.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100
