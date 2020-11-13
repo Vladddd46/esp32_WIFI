@@ -72,7 +72,7 @@ uint8_t *get_input_from_uart();
 /* Connect */
 void connect_command(char **cmd);
 void wifi_auto_connect();
-int connect_to_wifi(char *ssid, char *pass);
+int  connect_to_wifi(char *ssid, char *pass);
 
 void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 

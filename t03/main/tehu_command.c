@@ -8,7 +8,7 @@
  * If tehu stop -> sends "stop" str in queue(dht11_data_queue).
  */
 
-#define TEHU_WRONG_SYNTAX "Wrong syntax:\n\rtehu start ip_address port\n\rtehu stop"
+#define TEHU_WRONG_SYNTAX "Wrong syntax:\n\rtehu start domain port\n\rtehu stop"
 
 
 
