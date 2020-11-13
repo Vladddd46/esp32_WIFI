@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include "libmx.h"
 #include <netdb.h>
+#include "esp_wifi.h"
 
 #define UART_PORT   UART_NUM_1
 
@@ -20,5 +21,6 @@
 #define RESET_COLOR "\e[0m"
 
 void uart_print(char *msg, bool newline_1, bool newline_2, char *color);
-int create_connected_socket(char *ip, int port);
+int  create_connected_socket(char *ip, int port);
 char *resolve_ip_by_host_name(char *host_name);
+char *get_mac_address(void);
