@@ -21,6 +21,128 @@ static void inline erase_char() {
 
 
 
+/* All spaces, which are in double quotes, 
+ *  are changed to 8 ASCII character in 
+ *  order to split input to arr by space. 
+ * Then there is function(unlock_spaces_in_quotes),
+ *  which changes back all 8 ASCII characters in quotes
+ *  to space.
+ */
+static char *save_spaces_in_quotes(char *input) {
+    int num_of_dquotes = mx_count_char(input, '"');
+    if (num_of_dquotes % 2 != 0) {
+        uart_print(INVALID_NUM_DQUOTES, 0, 0, NULL);
+        uart_print("\r\n", 0, 0, NULL);
+        uart_print(PROMPT, 0, 0, NULL);
+        return NULL;
+    }
+    char *saved_spaces = mx_strnew(strlen(input));
+
+    bool quote = 0;
+    for (int i = 0; input[i]; ++i) {
+        if (input[i] == '"') {
+            if (quote) {
+                quote = 0;
+            }
+            else {
+                quote = 1;
+            }
+        }
+        if (input[i] == ' ' && quote  == 1) {
+            saved_spaces[i] = 8;
+        }
+        else {
+            saved_spaces[i] = input[i];
+        }
+    }
+    return saved_spaces;
+}
+
+
+
+/*
+ * Changes all 8 ASCII characters in spaces.
+ * If word is in double quotes - double quotes
+ *  are deleted.
+ */
+static char **unlock_spaces_in_quotes(char **cmd) {
+    int cmd_len    = mx_strarr_len(cmd);
+    char **new_cmd = mx_strarr_new(cmd_len);
+    char *tmp;
+
+    int len;
+    int j = 0;
+    int index;
+
+    for (int i = 0; cmd[i]; ++i) {
+        tmp = mx_strnew(strlen(cmd[i]));
+
+        if (cmd[i][0] == '"' && cmd[i][strlen(cmd[i]) - 1] == '"') {
+            len = strlen(cmd[i]) - 1;
+            j = 1;
+        }
+        else {
+            len = strlen(cmd[i]);
+            j = 0;
+        }
+        index = 0;
+        for (; j < len; ++j) {
+            if (cmd[i][j] == 8) {
+                tmp[index] = ' ';
+            }
+            else {
+                tmp[index] = cmd[i][j];
+            }
+            index += 1;
+        }
+        new_cmd[i] = tmp;
+    }
+    return new_cmd;
+}
+
+
+
+static void cmd_handle(char *input) {
+    int index = 0;
+    char *p = NULL;
+    char *cmd[100];
+    for (int i = 0; i < 100; ++i) {
+        cmd[i] = NULL;
+    }
+    char *locked_spaces_in_quote;
+    char **new_cmd;
+
+    locked_spaces_in_quote = save_spaces_in_quotes(input);
+    if (locked_spaces_in_quote == NULL) {
+        return;
+    }
+
+    // splitting str into arr.
+    index = 0;
+    p = strtok(locked_spaces_in_quote, " ");
+    cmd[index] = p;
+    index++;
+    while(p != NULL || index < 100) {
+        p = strtok(NULL, " ");
+        cmd[index] =  p;
+        index++;
+    }
+    // 
+
+    new_cmd = unlock_spaces_in_quotes((char **)cmd);
+    int cmd_len = mx_strarr_len(new_cmd);
+    execute(new_cmd, cmd_len);
+
+    // Freeing all malloced memmory.
+    free(locked_spaces_in_quote);
+    for (int i = 0; new_cmd[i]; ++i) {
+        free(new_cmd[i]);
+    }
+    free(new_cmd);
+}
+
+
+
 /*
  * Reads user`s input from UART and stores it in comman_line string.
  * When user press enter string command_line is getting executed.
@@ -103,125 +225,4 @@ void user_input() {
     }
 }
 
-
-
-/* All spaces, which are in double quotes, 
- *  are changed to 8 ASCII character in 
- *  order to split input to arr by space. 
- * Then there is function(unlock_spaces_in_quotes),
- *  which changes back all 8 ASCII characters in quotes
- *  to space.
- */
-static char *save_spaces_in_quotes(char *input) {
-    int num_of_dquotes = mx_count_char(input, '"');
-    if (num_of_dquotes % 2 != 0) {
-        uart_print(INVALID_NUM_DQUOTES, 0, 0, NULL);
-        uart_print("\r\n", 0, 0, NULL);
-        uart_print(PROMPT, 0, 0, NULL);
-        return NULL;
-    }
-    char *saved_spaces = mx_strnew(strlen(input));
-
-    bool quote = 0;
-    for (int i = 0; input[i]; ++i) {
-        if (input[i] == '"') {
-            if (quote) {
-                quote = 0;
-            }
-            else {
-                quote = 1;
-            }
-        }
-        if (input[i] == ' ' && quote  == 1) {
-            saved_spaces[i] = 8;
-        }
-        else {
-            saved_spaces[i] = input[i];
-        }
-    }
-    return saved_spaces;
-}
-
-
-
-/*
- * Changes all 8 ASCII characters in spaces.
- * If word is in double quotes - double quotes
- *  are deleted.
- */
-static char **unlock_spaces_in_quotes(char **cmd) {
-    int cmd_len    = mx_strarr_len(cmd);
-    char **new_cmd = mx_strarr_new(cmd_len);
-    char *tmp;
-
-    int len;
-    int j = 0;
-    int index;
-
-    for (int i = 0; cmd[i]; ++i) {
-        tmp = mx_strnew(strlen(cmd[i]));
-
-        if (cmd[i][0] == '"' && cmd[i][strlen(cmd[i]) - 1] == '"') {
-            len = strlen(cmd[i]) - 1;
-            j = 1;
-        }
-        else {
-            len = strlen(cmd[i]);
-            j = 0;
-        }
-        index = 0;
-        for (; j < len; ++j) {
-            if (cmd[i][j] == 8) {
-                tmp[index] = ' ';
-            }
-            else {
-                tmp[index] = cmd[i][j];
-            }
-            index += 1;
-        }
-        new_cmd[i] = tmp;
-    }
-    return new_cmd;
-}
-
-
-
-void cmd_handle(char *input) {
-    int index = 0;
-    char *p = NULL;
-    char *cmd[100];
-    for (int i = 0; i < 100; ++i) {
-        cmd[i] = NULL;
-    }
-    char *locked_spaces_in_quote;
-    char **new_cmd;
-
-    locked_spaces_in_quote = save_spaces_in_quotes(input);
-    if (locked_spaces_in_quote == NULL) {
-        return;
-    }
-
-    // splitting str into arr.
-    index = 0;
-    p = strtok(locked_spaces_in_quote, " ");
-    cmd[index] = p;
-    index++;
-    while(p != NULL || index < 100) {
-        p = strtok(NULL, " ");
-        cmd[index] =  p;
-        index++;
-    }
-    // 
-
-    new_cmd = unlock_spaces_in_quotes((char **)cmd);
-    int cmd_len = mx_strarr_len(new_cmd);
-    execute(new_cmd, cmd_len);
-
-    // Freeing all malloced memmory.
-    free(locked_spaces_in_quote);
-    for (int i = 0; new_cmd[i]; ++i) {
-        free(new_cmd[i]);
-    }
-    free(new_cmd);
-}
 
