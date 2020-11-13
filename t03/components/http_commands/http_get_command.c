@@ -1,15 +1,4 @@
-#include "header.h"
-#include "esp_wifi.h"
-#include "esp_event.h"
-#include "lwip/inet.h"
-#include "lwip/ip4_addr.h"
-#include "lwip/dns.h"
-#include "lwip/err.h"
-#include "lwip/sockets.h"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <netdb.h>
+#include "http_header.h"
 
 /* @Sends http GET request.
  * Resolves url with help of dns.
@@ -19,7 +8,7 @@
  */
 
 #define HTTP_GET_WRONG_SYNTAX "Wrong syntax: http_get url/must/be/here"
-#define NO_SUCH_HOST 	   "Host not found"
+#define NO_SUCH_HOST       "Host not found"
 
 
 
@@ -39,7 +28,7 @@ static char *resolve_ip_by_host_name(char *host_name) {
     else {
         uart_print(NO_SUCH_HOST, 0, 1, RED_TEXT);
     }
-	return NULL;
+    return NULL;
 }
 
 
@@ -55,7 +44,7 @@ static void inline send_http_get(int sock, char *path) {
     else {
         sprintf(get_request, "GET /%s HTTP/1.0\r\n\r\n", path);
     }
-   	send(sock, get_request, strlen(get_request), 0);
+    send(sock, get_request, strlen(get_request), 0);
 }
 
 
@@ -65,28 +54,28 @@ static void inline send_http_get(int sock, char *path) {
  * Returns array of 2 elements {host_name, path/to/document}
  */
 static char **split_url(char *url) {
-	char **arr = mx_strarr_new(2);
-	char host_name[500];
-	bzero(host_name, 500);
-	int i = 0;
-	int index = 0;
-	for (; url[i]; ++i) {
-		if (url[i] == '/') {
-			i += 1;
-			break;
-		}
-		host_name[i] = url[i];
-	}
-	char path_to_doc[500];
-	bzero(path_to_doc, 500);
-	index = 0;
-	for (; url[i]; ++i) {
-		path_to_doc[index] = url[i];
-		index++;
-	}
-	arr[0] = mx_string_copy(host_name);
-	arr[1] = mx_string_copy(path_to_doc);
-	return arr;
+    char **arr = mx_strarr_new(2);
+    char host_name[500];
+    bzero(host_name, 500);
+    int i = 0;
+    int index = 0;
+    for (; url[i]; ++i) {
+        if (url[i] == '/') {
+            i += 1;
+            break;
+        }
+        host_name[i] = url[i];
+    }
+    char path_to_doc[500];
+    bzero(path_to_doc, 500);
+    index = 0;
+    for (; url[i]; ++i) {
+        path_to_doc[index] = url[i];
+        index++;
+    }
+    arr[0] = mx_string_copy(host_name);
+    arr[1] = mx_string_copy(path_to_doc);
+    return arr;
 }
 
 
@@ -145,14 +134,14 @@ static int inline http_get_syntax_validate(int cmd_len) {
 
 void http_get_command(char **cmd, int len) {
     // syntax validation
-	if (http_get_syntax_validate(len)) {return;}
-	char **splited_url = split_url(cmd[1]);
+    if (http_get_syntax_validate(len)) {return;}
+    char **splited_url = split_url(cmd[1]);
     char *ip_adress    = resolve_ip_by_host_name(splited_url[0]);
 
     if (ip_adress != NULL) {
         int sock = create_connected_socket(ip_adress, 80);
         if (sock != -1) {
-    	    send_http_get(sock, splited_url[1]);
+            send_http_get(sock, splited_url[1]);
             receive_response(sock);
             // close connection with server
             shutdown(sock, 0);
@@ -160,14 +149,14 @@ void http_get_command(char **cmd, int len) {
         }
     }
 
-	// freeing memory.
-	for (int i = 0; splited_url[i] ; ++i) {
-		free(splited_url[i]);
-	}
-	free(splited_url);
-	if (ip_adress != NULL) {
-		free(ip_adress);
-	}
+    // freeing memory.
+    for (int i = 0; splited_url[i] ; ++i) {
+        free(splited_url[i]);
+    }
+    free(splited_url);
+    if (ip_adress != NULL) {
+        free(ip_adress);
+    }
 }
 
 

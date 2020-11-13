@@ -32,6 +32,7 @@
 #include <sys/socket.h>
 #include "utils.h"
 #include "get_dht11_data.h"
+#include "http_header.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100
@@ -74,7 +75,6 @@ void wifi_auto_connect();
 int connect_to_wifi(char *ssid, char *pass);
 
 void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
-void http_get_command(char **cmd, int len);
 
 void tehu_command(char **cmd, int len);
 void dht11_monitor();
