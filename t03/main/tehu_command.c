@@ -22,20 +22,10 @@ static int tehu_syntax_validator(char **cmd, int len) {
 		uart_print(TEHU_WRONG_SYNTAX, 0, 1, RED_TEXT);
 		return 1;
 	}
-	// port and ip validation
+	// port validation
 	if (len == 4) {
 		for (int i = 0; cmd[3][i]; ++i) {
 			if (isdigit(cmd[3][i]) == 0) {
-				uart_print(TEHU_WRONG_SYNTAX, 0, 1, RED_TEXT);
-				return 1;
-			}
-		}
-		for (int i = 0; cmd[2][i]; ++i) {
-			if (isdigit(cmd[2][i]) == 0 && cmd[2][i] != '.') {
-				uart_print(TEHU_WRONG_SYNTAX, 0, 1, RED_TEXT);
-				return 1;
-			}
-			else if (cmd[2][i] == '.' && cmd[2][i + 1] == '.') {
 				uart_print(TEHU_WRONG_SYNTAX, 0, 1, RED_TEXT);
 				return 1;
 			}

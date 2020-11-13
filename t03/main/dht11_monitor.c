@@ -40,17 +40,26 @@ static char *get_mac_address(void) {
  *      {"id": mac_address, "t": temperature, "h": humidity}
  *   4. frees all malloced memmory and returns json data.
  */
-static char *dht11_data_to_json(char *data) {
+static char *dht11_data_to_json(char *data, char *ip) {
     char *mac_address = get_mac_address();
     if (mac_address == NULL) {return NULL;}
     char **split_data = mx_strsplit(data, ' ');
-    char res[100];
-    bzero(res, 100);
-    sprintf(res, "{\"id\":\"%s\", \"t\":\"%s\", \"h\":\"%s\"}\n\r\n\r", mac_address, 
-                                                                        split_data[0], 
-                                                                        split_data[1]);
-    char *ret = mx_string_copy((char *)res);
 
+    char json_data[100];
+    bzero(json_data, 100);
+    sprintf(json_data, "{\"id\":\"%s\", \"t\":\"%s\", \"h\":\"%s\"}", mac_address, 
+                                                                      split_data[0], 
+                                                                      split_data[1]);
+    int content_len = strlen((char *)json_data);
+
+    char res[500];
+    bzero(res, 500);
+    sprintf(res, "POST /dht-json-decoded HTTP/1.0\r\nHost: %s\r\nContent-Type: \
+                  application/json\r\nContent-Length: %d\r\n\r\n%s",
+                 ip, content_len, json_data);
+
+
+    char *ret = mx_string_copy((char *)res);
     for (int i = 0; split_data[i]; ++i) {
         free(split_data[i]);
     }
@@ -75,12 +84,17 @@ static bool send_dht11_data_to_server(char *ip, int port) {
 
     char *data = get_dht11_data(DHT11_POWER, DHT11_DATA); 
     if (data != NULL) {
-        char *send_data = dht11_data_to_json(data);
+        char *send_data = dht11_data_to_json(data, ip);
         if (send_data != NULL) {
             send(sock, send_data, strlen(send_data), 0);
             free(send_data);
         }
         free(data);
+
+        char rx_buffer[5000];
+        bzero(rx_buffer, 5000);
+        recv(sock, rx_buffer, 4449, 0);
+        printf(">>>%s\n", rx_buffer);
     }
     close(sock);
     return true;
@@ -97,7 +111,7 @@ void dht11_monitor() {
 
     bool is_send = false;
 
-    char *ip_to_send  = NULL;
+    char *host_name  = NULL;
     int  port_to_send = -1;
     char *tmp_port;
 
@@ -107,8 +121,8 @@ void dht11_monitor() {
                 is_send = false;
             }
             else {
-                ip_to_send     = strtok(queue_data, " ");
-                if (ip_to_send == NULL) {
+                host_name     = strtok(queue_data, " ");
+                if (host_name == NULL) {
                     uart_print(QUEUE_ERROR, 1, 1, RED_TEXT);
                     continue;
                 }
@@ -122,9 +136,11 @@ void dht11_monitor() {
             }
         }
         if (is_send == true) {
-            if (send_dht11_data_to_server(ip_to_send, port_to_send) == false) {
+            char *ip = resolve_ip_by_host_name(host_name);
+            if (ip == NULL || send_dht11_data_to_server(ip, port_to_send) == false) {
                 is_send = false;
             }
+            if (ip != NULL) {free(ip);}
         }
         vTaskDelay(350);
     }

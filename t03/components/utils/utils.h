@@ -6,6 +6,8 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include "libmx.h"
+#include <netdb.h>
 
 #define UART_PORT   UART_NUM_1
 
@@ -18,3 +20,4 @@
 
 void uart_print(char *msg, bool newline_1, bool newline_2, char *color);
 int create_connected_socket(char *ip, int port);
+char *resolve_ip_by_host_name(char *host_name);
