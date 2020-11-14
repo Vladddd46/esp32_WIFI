@@ -25,7 +25,7 @@ static const char* INFOTAG = "info: ";
  *      {"id": mac_address, "t": temperature, "h": humidity}
  *   4. frees all malloced memmory and returns json data.
  */
-static char *packet_former(char *dht11_data, char *host_name) {
+static char *packet_former(char *dht11_data, char *domain, char *path) {
     char *mac_address = get_mac_address();
     if (mac_address == NULL) {return NULL;}
     char **split_data = mx_strsplit(dht11_data, ' ');
@@ -39,9 +39,16 @@ static char *packet_former(char *dht11_data, char *host_name) {
 
     char res[500];
     bzero(res, 500);
-    sprintf(res, "POST /dht-json-decoded HTTP/1.0\r\nHost: %s\r\nContent-Type: \
+    if (path == NULL) {
+        sprintf(res, "POST / HTTP/1.0\r\nHost: %s\r\nContent-Type: \
                   application/json\r\nContent-Length: %d\r\n\r\n%s",
-                 host_name, content_len, json_data);
+                 domain, content_len, json_data);
+    }
+    else {
+        sprintf(res, "POST /%s HTTP/1.0\r\nHost: %s\r\nContent-Type: \
+                  application/json\r\nContent-Length: %d\r\n\r\n%s",
+                 path, domain, content_len, json_data);
+    }
 
     char *ret = mx_string_copy((char *)res);
     for (int i = 0; split_data[i]; ++i) {
@@ -54,7 +61,7 @@ static char *packet_former(char *dht11_data, char *host_name) {
 
 
 
-static esp_err_t tls_send(char *payload, char *host_name) {
+static esp_err_t tls_send(char *payload, char *host_domain) {
     static char errortext[256];
     mbedtls_net_context server_fd;
     mbedtls_entropy_context entropy;
@@ -79,7 +86,7 @@ static esp_err_t tls_send(char *payload, char *host_name) {
         return (ESP_FAIL);
     }
 
-    if ((ret = mbedtls_net_connect(&server_fd, host_name, port, MBEDTLS_NET_PROTO_TCP)) != 0) {
+    if ((ret = mbedtls_net_connect(&server_fd, host_domain, port, MBEDTLS_NET_PROTO_TCP)) != 0) {
         ESP_LOGE(ERRORTAG, "mbedtls_net_connect failed %d\n", ret);
         return (ESP_FAIL);
     }
@@ -98,7 +105,7 @@ static esp_err_t tls_send(char *payload, char *host_name) {
                  ret, errortext);
     }
 
-    if ((ret = mbedtls_ssl_set_hostname(&ssl, host_name)) != 0) {
+    if ((ret = mbedtls_ssl_set_hostname(&ssl, host_domain)) != 0) {
         ESP_LOGE(ERRORTAG, "mbedtls_ssl_set_hostname failed %d\n", ret);
     }
 
@@ -146,12 +153,25 @@ static esp_err_t tls_send(char *payload, char *host_name) {
 static bool send_dht11_data_to_server(char *host_name, int port) {
     if (host_name == NULL || port == -1) {return false;}
 
+
+    char *domain = NULL;
+    char *path   = NULL;
+    char *tmp = mx_string_copy(host_name);
+    if (mx_count_char(tmp, '/')) {
+        domain = strtok(tmp, "/");
+        path =  strtok(NULL, " ");
+    }
+    else {
+        domain = tmp;
+    }
+
     char *dht11_data = get_dht11_data(DHT11_POWER, DHT11_DATA); 
     if (dht11_data != NULL) {
-        char *payload = packet_former(dht11_data, host_name);
-        tls_send(payload, host_name);
+        char *payload = packet_former(dht11_data, domain, path);
+        tls_send(payload, domain);
         if (payload != NULL) {free(payload);}
     }
+    free(tmp);
     return true;
 }
 
@@ -170,7 +190,6 @@ void dht11_monitor() {
     char *host_name  = NULL;
     int  port_to_send = -1;
     char *tmp_port;
-
     while(true) {
         if (xQueueReceive(dht11_data_queue, (void *)queue_data, (TickType_t)10)) {
             if (!strcmp(queue_data, "stop")) {
