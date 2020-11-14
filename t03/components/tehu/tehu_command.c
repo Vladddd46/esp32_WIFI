@@ -1,4 +1,4 @@
-#include "header.h"
+#include "tehu.h"
 
 /* @ Makes/Stops esp32 send data from dht11 sensor to remote server. 
  * Syntax: tehu start [server_ip] [server_port]

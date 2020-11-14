@@ -1,4 +1,4 @@
-#include "header.h"
+#include "input.h"
 
 #define LF_ASCII_CODE 0xA
 #define CR_ASCII_CODE 0xD // \r the same

@@ -1,4 +1,4 @@
-#include "header.h"
+#include "input.h"
 
 /* @ Gets input from UART.
  *   Returns characters placed in UART.

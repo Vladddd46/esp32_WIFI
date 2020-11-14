@@ -1,4 +1,4 @@
-#include "header.h"
+#include "input.h"
 
 /*
  * Determines the type of command

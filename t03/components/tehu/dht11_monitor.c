@@ -1,15 +1,5 @@
-#include "header.h"
+#include "tehu.h"
   
-// libs for tls.
-#include "mbedtls/net.h"
-#include "mbedtls/ssl.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/debug.h"
-#include <errno.h>
-#include "esp_tls.h"
-#include "esp_crt_bundle.h"
-#include <mbedtls/error.h>
 
 static const char* ERRORTAG = "error: ";
 static const char* INFOTAG = "info: ";
@@ -64,7 +54,7 @@ static char *packet_former(char *dht11_data, char *host_name) {
 
 
 
-esp_err_t tls_send(char *payload, char *host_name) {
+static esp_err_t tls_send(char *payload, char *host_name) {
     static char errortext[256];
     mbedtls_net_context server_fd;
     mbedtls_entropy_context entropy;
