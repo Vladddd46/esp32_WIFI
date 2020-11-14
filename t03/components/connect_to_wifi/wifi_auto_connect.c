@@ -1,4 +1,4 @@
-#include "header.h"
+#include "connect_to_wifi.h"
 
 /* @ Connects to acquainted wifi.
  * Scans all available AP(access points).

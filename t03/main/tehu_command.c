@@ -41,6 +41,7 @@ void tehu_command(char **cmd, int len) {
 
 	char data[100];
 	bzero(data, 100);
+
 	if (len == 2) {
 		sprintf(data, "stop");
 		uart_print("Sending data from dht11 stopped", 0, 1, BLUE_TEXT);

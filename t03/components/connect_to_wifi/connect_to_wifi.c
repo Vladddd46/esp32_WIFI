@@ -1,4 +1,4 @@
-#include "header.h"
+#include "connect_to_wifi.h"
 
 /* @ Implementation of connect command.
  *  connects to specified SSID(wifi name) with 

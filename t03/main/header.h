@@ -36,48 +36,24 @@
 #include "http_header.h"
 #include "esp_tls.h"
 #include "esp_crt_bundle.h"
+#include "connect_to_wifi.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100
 #define NEWLINE 				"\n\r"		
-#define WIFI_STORAGE			"WIFI_data"
-#define NUM_OF_WIFI_RECONNECT   5
-
-/* Wifi Connection States */
-#define DISCONNECTED_WIFI_STATE  0
-#define DISCONNECTING_WIFI_STATE 1
-#define CONNECTING_WIFI_STATE    2
-#define CONNECTED_WIFI_STATE     3
-
-
-struct wifi_info_s {
-	int  wifi_connection_state;
-	char *ssid;
-	char *password;
-};
 
 
 QueueHandle_t uart0_queue;
-struct wifi_info_s wifi_info;
 QueueHandle_t dht11_data_queue;
 
 // clears input in case occured event printed something in UART.
 bool clear_input_flag; 
-bool cmd_is_executing;
 
-/* dns */
-ip_addr_t ip_Addr;
 
 void execute(char **cmd, int len);
 void user_input();
 uint8_t *get_input_from_uart();
 
-/* Connect */
-void connect_command(char **cmd);
-void wifi_auto_connect();
-int  connect_to_wifi(char *ssid, char *pass);
-
-void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 
 void tehu_command(char **cmd, int len);
 void dht11_monitor();
