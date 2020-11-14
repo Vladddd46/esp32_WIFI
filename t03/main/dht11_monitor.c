@@ -155,8 +155,6 @@ esp_err_t tls_send(char *payload, char *host_name) {
  */
 static bool send_dht11_data_to_server(char *host_name, int port) {
     if (host_name == NULL || port == -1) {return false;}
-    // int sock   = create_connected_socket(ip, port);
-    // if (sock == -1) {return false;}
 
     char *dht11_data = get_dht11_data(DHT11_POWER, DHT11_DATA); 
     if (dht11_data != NULL) {
@@ -164,7 +162,6 @@ static bool send_dht11_data_to_server(char *host_name, int port) {
         tls_send(payload, host_name);
         if (payload != NULL) {free(payload);}
     }
-    // close(sock);
     return true;
 }
 
@@ -190,7 +187,7 @@ void dht11_monitor() {
                 is_send = false;
             }
             else {
-                host_name     = strtok(queue_data, " ");
+                host_name = strtok(queue_data, " ");
                 if (host_name == NULL) {
                     uart_print(QUEUE_ERROR, 1, 1, RED_TEXT);
                     continue;
