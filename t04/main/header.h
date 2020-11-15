@@ -40,7 +40,10 @@
 #include "input.h"
 #include "tehu.h"
 
+int current_time;
+TaskHandle_t  xTaskClock;
 
+void timer_task(void *arg);
 
 
 
