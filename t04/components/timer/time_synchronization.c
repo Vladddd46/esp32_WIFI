@@ -5,9 +5,6 @@ void time_synchronization(void *arg) {
     sntp_setservername(0, "pool.ntp.org");
     sntp_init();
 
-    setenv("TZ", "GMT+0", 1);
-	tzset();
-
     while(1) {
         // wait for time to be set
         time_t now = 0;
