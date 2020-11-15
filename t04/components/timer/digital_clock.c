@@ -1,4 +1,4 @@
-#include "header.h"
+#include "timer.h"
 
 #define TIMER_DIVIDER         80 //  Hardware timer clock divider
 #define TIMER_SCALE           (TIMER_BASE_CLK / TIMER_DIVIDER)  // convert counter value to seconds
@@ -87,7 +87,6 @@ static void print_current_time_on_display(sh1106_t *display) {
 }
 
 
-
 void timer_task(void *arg) {
     // turn on oled display.
     gpio_set_direction(OLED_GPIO, GPIO_MODE_OUTPUT);
@@ -99,7 +98,7 @@ void timer_task(void *arg) {
     // turning on display.
     sh1106_t display;
     sh1106_init(&display);
-    sh1106_clear(&display);
+    sh1106_clear(&display);   
 
     while (1) {
         xTaskNotifyWait(0x00000000, 0x00000000, NULL, portMAX_DELAY);

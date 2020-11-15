@@ -25,7 +25,10 @@ void execute(char **cmd, int len) {
     else if (!strcmp(cmd[0], "tehu")) {
         tehu_command(cmd, len);
     }
-    else  {
+    else if (!strcmp(cmd[0], "tz_set")) {
+        tz_set(cmd, len);
+    }
+    else {
         no_such_command_error();
     }
 

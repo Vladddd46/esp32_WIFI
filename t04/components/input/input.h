@@ -19,6 +19,7 @@
 #include "utils.h"
 #include "tehu.h"
 #include "http_header.h"
+#include "timer.h"
 
 /* Config */
 #define COMMAND_LINE_MAX_LENGTH 100
