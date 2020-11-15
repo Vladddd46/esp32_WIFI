@@ -7,8 +7,8 @@
 
 #define TZ_SET_INVALID_SYNTAX   "Wrong syntax: tz_set time-zone"
 #define TZ_SET_INVALID_TIMEZONE "Invalid time-zone type. Use:"
-#define TZ_SET_SUCCESS			"Time-zone successfully set"
-
+#define TZ_SET_SUCCESS			"Time-zone successfully set."
+#define TZ_SET_SUCCESS_MSG		"Soon clock will update if device is connected to the Internet."
 
 
 static void inline invalid_arg_msg() {
@@ -68,5 +68,6 @@ void tz_set(char **cmd, int len) {
 	}
 	setenv("TZ", cmd[1], 1);
 	tzset();
-	uart_print(TZ_SET_SUCCESS, 0, 1, GREEN_TEXT);
+	uart_print(TZ_SET_SUCCESS,     0, 1, GREEN_TEXT);
+	uart_print(TZ_SET_SUCCESS_MSG, 0, 1, GREEN_TEXT);
 }

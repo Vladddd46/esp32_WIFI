@@ -87,23 +87,26 @@ static void print_current_time_on_display(sh1106_t *display) {
 }
 
 
+
 void timer_task(void *arg) {
     // turn on oled display.
     gpio_set_direction(OLED_GPIO, GPIO_MODE_OUTPUT);
     gpio_set_level(OLED_GPIO, 1);
 
     timer_initialization(TIMER_0, TIMER_INTERVAL1_SEC);
-    current_time = 0;
+    current_time = synchronized_time;
 
     // turning on display.
     sh1106_t display;
     sh1106_init(&display);
     sh1106_clear(&display);   
 
+    current_time = 0;
     while (1) {
         xTaskNotifyWait(0x00000000, 0x00000000, NULL, portMAX_DELAY);
-        if (current_time == DAY_IN_SECONDS)
+        if (current_time == DAY_IN_SECONDS) {
             current_time = 0;
+        }
         print_current_time_on_display(&display);
         current_time += 1;
     }

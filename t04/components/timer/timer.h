@@ -37,6 +37,7 @@
 
 
 int current_time;
+int synchronized_time;
 TaskHandle_t  xTaskClock;
 
 void tz_set(char **cmd, int len);
