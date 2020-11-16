@@ -17,15 +17,14 @@ void wifi_auto_connect() {
     wifi_ap_record_t ap_records[20];
     bzero(ap_records, 20);
     esp_wifi_scan_get_ap_records(&ap_num, ap_records);
-
     nvs_handle_t my_handle;
     nvs_open(WIFI_STORAGE, NVS_READWRITE, &my_handle);
-
-    char *ap_ssid;
+    char ap_ssid[100];
     char *password;
     for(int i = 0; i < ap_num; i++) {
         if ((char *)ap_records[i].ssid == NULL) {continue;}
-        ap_ssid = mx_string_copy((char *)ap_records[i].ssid);
+        bzero(ap_ssid, 100);
+        sprintf(ap_ssid, "%s", ap_records[i].ssid);
         size_t required_size;
         nvs_get_str(my_handle, ap_ssid, NULL, &required_size);
         if ((int)required_size == 0) {
@@ -37,12 +36,10 @@ void wifi_auto_connect() {
             err = connect_to_wifi(ap_ssid, password);
             if (err != -1) {
                 free(password);
-                free(ap_ssid);
                 break;
             }
         }
         free(password);
-        free(ap_ssid);
     }
     nvs_close(my_handle);
 }

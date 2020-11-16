@@ -35,6 +35,7 @@
 #include "tehu.h"
 #include "timer.h"
 
+#define TIMEZONE_STORAGE "time-zone"
 
 int current_time;
 int synchronized_time;
@@ -43,5 +44,5 @@ TaskHandle_t  xTaskClock;
 void tz_set(char **cmd, int len);
 void time_synchronization(void *arg);
 void timer_task(void *arg);
-
+void init_tz();
 

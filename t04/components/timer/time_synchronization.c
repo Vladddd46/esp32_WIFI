@@ -32,7 +32,7 @@ void time_synchronization(void *arg) {
         synchronized_time = (timeinfo.tm_hour * 3600) + (timeinfo.tm_min * 60) + timeinfo.tm_sec;
         current_time = synchronized_time;
         // printf("=%d\n", synchronized_time);
-        vTaskDelay(5000);
+        vTaskDelay(1000);
     }
 }
 

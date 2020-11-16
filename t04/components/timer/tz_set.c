@@ -55,6 +55,58 @@ static bool arg_validate(char *tz_arg) {
 	return found;
 }
 
+/*
+ * Saves time-zone in
+ *  non-volatile storage.
+ */
+static void inline write_tz_in_nvc(char *tz) {
+    nvs_handle_t my_handle;
+    esp_err_t err;
+    char error_msg[100];
+    bzero(error_msg, 100);
+
+    err = nvs_open(TIMEZONE_STORAGE, NVS_READWRITE, &my_handle);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while opening nvc: %d", err);
+        uart_print(error_msg, 0, 1, RED_TEXT);
+        return;
+    }
+    err = nvs_set_str(my_handle, TIMEZONE_STORAGE, tz);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while writing in nvc: %d", err);
+        uart_print(error_msg, 0, 1, RED_TEXT);
+        return;
+    }
+    nvs_close(my_handle);
+}
+
+
+void init_tz() {
+	nvs_handle_t my_handle;
+    char error_msg[100];
+    bzero(error_msg, 100);
+    esp_err_t err = nvs_open(TIMEZONE_STORAGE, NVS_READWRITE, &my_handle);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while opening nvc: %d", err);
+        uart_print(error_msg, 0, 1, RED_TEXT);
+        return;
+    }
+
+	size_t required_size;
+	nvs_get_str(my_handle, TIMEZONE_STORAGE, NULL, &required_size);
+	if (required_size == 0) {
+		printf("no var\n");
+		return;
+	}
+	char *tz = mx_strnew(required_size);
+	char tz_static[20];
+	bzero(tz_static, 20);
+	sprintf(tz_static, "%s", tz);
+    nvs_get_str(my_handle, TIMEZONE_STORAGE, tz_static, &required_size);
+    setenv("TZ", tz_static, 1);
+	tzset();
+	free(tz);
+}
 
 
 void tz_set(char **cmd, int len) {
@@ -70,4 +122,9 @@ void tz_set(char **cmd, int len) {
 	tzset();
 	uart_print(TZ_SET_SUCCESS,     0, 1, GREEN_TEXT);
 	uart_print(TZ_SET_SUCCESS_MSG, 0, 1, GREEN_TEXT);
+	write_tz_in_nvc(cmd[1]);
 }
+
+
+
+

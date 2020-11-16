@@ -58,12 +58,13 @@ void app_main() {
     uart_init(9600);
     nvc_init();
     wifi_initialization();
-    wifi_auto_connect();
+    // wifi_auto_connect();
     init_i2c_driver();
-    
+    init_tz();
+
     xTaskCreate(user_input,           "user_input",           42040, NULL, 10, NULL);
     xTaskCreate(time_synchronization, "time_synchronization", 12040, NULL, 10, NULL);
     xTaskCreate(dht11_monitor,        "dht11_monitor",        52040, NULL, 10, NULL);
-    xTaskCreate(timer_task,            "timer",               12040, NULL, 10, &xTaskClock);
+    xTaskCreate(timer_task,           "timer",                12040, NULL, 10, &xTaskClock);
 }
 
