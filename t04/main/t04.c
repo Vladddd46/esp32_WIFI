@@ -58,7 +58,7 @@ void app_main() {
     uart_init(9600);
     nvc_init();
     wifi_initialization();
-    // wifi_auto_connect();
+    wifi_auto_connect();
     init_i2c_driver();
     init_tz();
 
