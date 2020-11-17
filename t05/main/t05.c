@@ -4,7 +4,6 @@
 #define UART_RX_PIN 16
 
 
-
 static void inline nvc_init() {
     esp_err_t err;
     err = nvs_flash_init();
@@ -32,36 +31,13 @@ static void inline uart_init(int baud_rate) {
 
 
 
-// Initialize wifi routines.
-static void inline wifi_initialization() {
-    // init wifi info stuct.
-    wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
-    wifi_info.ssid     = NULL;
-    wifi_info.password = NULL;
-
-    esp_netif_init();
-    esp_event_loop_create_default();
-    esp_netif_create_default_wifi_sta();
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&cfg);
-    esp_wifi_start();
-
-    esp_event_handler_instance_t instance_any_id;
-    esp_event_handler_instance_t instance_got_ip;
-    esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,    &event_handler, NULL, &instance_any_id);
-    esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip);
-}
-
-
-
 void app_main() {
     uart_init(9600);
     nvc_init();
-    wifi_initialization();
-    wifi_auto_connect();
     init_i2c_driver();
     init_tz();
 
+    wifi_init_ap();
     xTaskCreate(user_input,           "user_input",           42040, NULL, 10, NULL);
     xTaskCreate(time_synchronization, "time_synchronization", 12040, NULL, 10, NULL);
     xTaskCreate(dht11_monitor,        "dht11_monitor",        52040, NULL, 10, NULL);
