@@ -2,6 +2,12 @@
 
 
 esp_err_t get_handler(httpd_req_t *req) {
+    printf("=%s\n", req->uri);
+     char **avaliable_networks = scan_wifi_networks();
+    for (int i = 0; avaliable_networks[i]; ++i) {
+        printf("%s\n", avaliable_networks[i]);
+    }
+
     const char resp[] = "<h1>Hello world!</h1>";
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
@@ -41,7 +47,7 @@ httpd_uri_t uri_post = {
 
 
 
-httpd_handle_t http_server_init(void) {
+httpd_handle_t http_server_init() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     httpd_handle_t server = NULL;
 

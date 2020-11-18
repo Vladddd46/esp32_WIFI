@@ -10,5 +10,6 @@
 #include "esp_eth.h"
 #include <esp_http_server.h>
 #include <stdio.h>
+#include "utils.h"
 
 httpd_handle_t http_server_init(void);
