@@ -18,12 +18,12 @@ char **scan_wifi_networks() {
     uint16_t ap_num;
     wifi_ap_record_t ap_records[20];
     bzero(ap_records, 20);
-
     esp_wifi_scan_get_ap_records(&ap_num, ap_records);
 
     char buff[100];
     char **res = mx_strarr_new(ap_num);
   	int index = 0;
+
     for(int i = 0; i < ap_num; i++) {
         if ((char *)ap_records[i].ssid == NULL) {continue;}
         bzero(buff, 100);

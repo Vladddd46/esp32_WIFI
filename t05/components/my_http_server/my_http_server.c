@@ -1,15 +1,36 @@
 #include "my_http_server.h"
 
+char *tag_wrapper(char *str, char *tag) {
+    char res[100];
+    bzero(res, 100);
+
+    sprintf(res, "<%s>%s</%s>", tag, str, tag);
+    char *result = mx_string_copy(res);
+    return result;
+}
+
 
 esp_err_t get_handler(httpd_req_t *req) {
     printf("=%s\n", req->uri);
-     char **avaliable_networks = scan_wifi_networks();
-    for (int i = 0; avaliable_networks[i]; ++i) {
-        printf("%s\n", avaliable_networks[i]);
-    }
 
-    const char resp[] = "<h1>Hello world!</h1>";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    char response[300];
+    bzero(response, 300);
+    
+    printf("1>\n");
+    char **avaliable_networks = scan_wifi_networks();
+    printf("2>\n");
+
+    int index = 0;
+    for (int i = 0; avaliable_networks[i]; ++i) {
+        char *wrapped_str = tag_wrapper(avaliable_networks[i], "h3");
+        for (int j = 0; wrapped_str[j]; ++j) {
+           response[index] = wrapped_str[j];
+           index++;
+        }
+        free(wrapped_str);
+    }
+    httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
+
     return ESP_OK;
 }
 
