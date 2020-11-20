@@ -55,8 +55,6 @@ void app_main() {
     nvc_init();
     init_i2c_driver();
     init_tz();
-    
-    // wifi_initialization();
 
     // char **avaliable_networks = scan_wifi_networks();
     // for (int i = 0; avaliable_networks[i]; ++i) {
