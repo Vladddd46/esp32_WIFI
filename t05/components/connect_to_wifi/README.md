@@ -1,0 +1,1 @@
+Functions, which are used for connecting esp32 to wifi AP(access point)

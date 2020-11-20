@@ -30,5 +30,5 @@
 void connect_command(char **cmd);
 void wifi_auto_connect();
 
-int connect_to_wifi(char *ssid, char *pass);
+int  connect_to_wifi(char *ssid, char *pass);
 void print_connection_log();

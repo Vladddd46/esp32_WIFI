@@ -40,7 +40,7 @@ void app_main() {
     wifi_init_apsta(); // initialize wifi routines.
     http_server_init(); // turn on http server.
 
-    xTaskCreate(user_input,           "user_input",           42040, NULL, 10, NULL);
+    xTaskCreate(user_input,           "user_input",           72040, NULL, 10, NULL);
     // xTaskCreate(time_synchronization, "time_synchronization", 12040, NULL, 10, NULL); // do not need in this task
     // xTaskCreate(dht11_monitor,        "dht11_monitor",        52040, NULL, 10, NULL); // do not need in this task
     // xTaskCreate(timer_task,           "timer",                12040, NULL, 10, &xTaskClock); // do not need in this task
