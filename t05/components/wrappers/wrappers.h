@@ -18,10 +18,15 @@
 #define GPIO_LED3 33
 
 void gpio_set_direction_wrapper(int gpio, int mode);
+
 void gpio_set_level_wrapper(int gpio, int level);
+
 void gpio_set(int gpio, int mode, int level);
+
 void dac_output_enable_wrapper(int dac_channel);
 
 void led_set_by_id(int led_id, int mode);
+
 void all_led_set(int mode);
+
 void led_mode(int gpio_led, int set);

@@ -25,27 +25,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include "utils.h"
+#include "wifi_module.h"
 
-#define WIFI_STORAGE			"WIFI_data"
-#define NUM_OF_WIFI_RECONNECT   5
-
-/* Wifi Connection States */
-#define DISCONNECTED_WIFI_STATE  0
-#define DISCONNECTING_WIFI_STATE 1
-#define CONNECTING_WIFI_STATE    2
-#define CONNECTED_WIFI_STATE     3
-
-struct wifi_info_s {
-	int  wifi_connection_state;
-	char *ssid;
-	char *password;
-};
-
-struct wifi_info_s wifi_info;
-bool cmd_is_executing;
-
-void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 void connect_command(char **cmd);
 void wifi_auto_connect();
 
 int connect_to_wifi(char *ssid, char *pass);
+void print_connection_log();

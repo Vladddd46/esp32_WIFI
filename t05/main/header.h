@@ -40,5 +40,5 @@
 #include "input.h"
 #include "tehu.h"
 #include "timer.h"
-#include "wifi_ap.h"
+#include "wifi_module.h"
 #include "my_http_server.h"
