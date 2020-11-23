@@ -12,11 +12,21 @@ static char *tag_wrapper(char *str, char *tag) {
     return result;
 }
 
+static char *form_wrapper(char *ssid_name) {
+    char res[300];
+    bzero(res, 300);
+
+    sprintf(res, "<form name=\"test\" method=\"post\"><p>%s<input type=\"text\" size=\"40\" placeholder=\"password\">\
+            <input type=\"submit\" value=\"Connect\"></p></form>", ssid_name);
+    char *result = mx_string_copy(res);
+    return result;
+}
+
 
 
 esp_err_t get_handler(httpd_req_t *req) {
-    char response[300];
-    bzero(response, 300);
+    char response[800];
+    bzero(response, 800);
     
     printf("scanning\n");
     char **avaliable_networks = scan_wifi_networks();
@@ -24,19 +34,23 @@ esp_err_t get_handler(httpd_req_t *req) {
     
     int index = 0;
     for (int i = 0; avaliable_networks[i]; ++i) {
-        char *wrapped_str = tag_wrapper(avaliable_networks[i], "h3");
+        printf("1\n");
+        char *wrapped_str = form_wrapper(avaliable_networks[i]);
+        printf("2\n");
         for (int j = 0; wrapped_str[j]; ++j) {
            response[index] = wrapped_str[j];
            index++;
         }
         free(wrapped_str);
     }
+    printf("123456789\n");
     httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
-
+    printf("hello world\n");
     // freeing memmory.
     for (int i = 0; avaliable_networks[i] ; ++i) {
         free(avaliable_networks[i]);
     }
+    printf("yes\n");
     free(avaliable_networks);
     return ESP_OK;
 }
