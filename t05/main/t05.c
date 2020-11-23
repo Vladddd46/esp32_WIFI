@@ -34,15 +34,10 @@ static void inline uart_init(int baud_rate) {
 void app_main() {
     uart_init(9600);
     nvc_init();
-    // init_i2c_driver();   // do not need in this task (needs to communicate with display)
-    // init_tz(); // initialize time-zone (takes time zone from nvs) // do not need in this task
 
     wifi_init_apsta(); // initialize wifi routines.
     http_server_init(); // turn on http server.
 
-    xTaskCreate(user_input,           "user_input",           72040, NULL, 10, NULL);
-    // xTaskCreate(time_synchronization, "time_synchronization", 12040, NULL, 10, NULL); // do not need in this task
-    // xTaskCreate(dht11_monitor,        "dht11_monitor",        52040, NULL, 10, NULL); // do not need in this task
-    // xTaskCreate(timer_task,           "timer",                12040, NULL, 10, &xTaskClock); // do not need in this task
+    // xTaskCreate(user_input, "user_input", 72040, NULL, 10, NULL);
 }
 

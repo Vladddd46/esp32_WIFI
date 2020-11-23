@@ -1,6 +1,9 @@
 #include "my_http_server.h"
 
-char *tag_wrapper(char *str, char *tag) {
+
+
+
+static char *tag_wrapper(char *str, char *tag) {
     char res[100];
     bzero(res, 100);
 
@@ -10,16 +13,15 @@ char *tag_wrapper(char *str, char *tag) {
 }
 
 
-esp_err_t get_handler(httpd_req_t *req) {
-    printf("=%s\n", req->uri);
 
+esp_err_t get_handler(httpd_req_t *req) {
     char response[300];
     bzero(response, 300);
     
-    printf("1>\n");
+    printf("scanning\n");
     char **avaliable_networks = scan_wifi_networks();
-    printf("2>\n");
-
+    printf("end scann\n");
+    
     int index = 0;
     for (int i = 0; avaliable_networks[i]; ++i) {
         char *wrapped_str = tag_wrapper(avaliable_networks[i], "h3");
@@ -31,8 +33,15 @@ esp_err_t get_handler(httpd_req_t *req) {
     }
     httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
 
+    // freeing memmory.
+    for (int i = 0; avaliable_networks[i] ; ++i) {
+        free(avaliable_networks[i]);
+    }
+    free(avaliable_networks);
     return ESP_OK;
 }
+
+
 
 esp_err_t post_handler(httpd_req_t *req) {
     char content[100];
@@ -49,6 +58,8 @@ esp_err_t post_handler(httpd_req_t *req) {
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
+
+
 
 httpd_uri_t uri_get = {
     .uri = "/",
