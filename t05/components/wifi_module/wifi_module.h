@@ -19,7 +19,7 @@
 #define WIFI_MODE WIFI_APSTA_MODE
 
 
-#define AP_SSID              "ПРИВЕТ_ЮРА"
+#define AP_SSID              "ПРИВЕТ"
 #define AP_PASSWORD          "qwerty1234"
 #define WIFI_CHANNEL           1
 #define MAX_NUM_OF_CONNECTIONS 10
