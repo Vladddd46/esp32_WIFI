@@ -52,4 +52,12 @@ void wifi_initialization_in_sta_mode();
 void wifi_init_apsta(void);
 
 // Handles events occurred with WIFI.
-void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+// void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+
+
+/* WIFI evvents */
+void WIFIEVENT_sta_disconnected_from_ap(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+void WIFIEVENT_sta_connected_to_ap(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+void WIFIEVENT_sta_disconnected_from_wifi(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+void WIFIEVENT_sta_got_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
+void WIFIEVENT_sta_lost_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);

@@ -38,6 +38,6 @@ void app_main() {
     wifi_init_apsta(); // initialize wifi routines.
     http_server_init(); // turn on http server.
 
-    xTaskCreate(user_input, "user_input", 72040, NULL, 10, NULL);
+    // xTaskCreate(user_input, "user_input", 72040, NULL, 10, NULL);
 }
 
