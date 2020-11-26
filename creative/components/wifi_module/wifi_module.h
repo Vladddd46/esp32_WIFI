@@ -45,20 +45,12 @@ struct wifi_info_s wifi_info;
 // determines, whether some command is being currently executing. (Needs in order not to mix UART output.)
 bool cmd_is_executing;
 
-// initialize wifi in STA(station) mode.
-void wifi_initialization_in_sta_mode();
-
 // initialize wifi in AP_STA(access point and station) mode.
 void wifi_init_apsta(void);
-
-// Handles events occurred with WIFI.
-void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
-
-
 
 // WIFI EVENTS
 void WIFIEVENT_sta_got_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 void WIFIEVENT_sta_lost_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 void WIFIEVENT_ap_connected(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 void WIFIEVENT_ap_disconnected(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
-
+void WIFIEVENT_sta_disconnected(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
