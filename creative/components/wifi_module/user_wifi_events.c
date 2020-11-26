@@ -28,3 +28,25 @@ void WIFIEVENT_sta_lost_ip(void *arg, esp_event_base_t event_base, int32_t event
     wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
 }
 
+/* @ WIFI_EVENT_AP_STACONNECTED
+ * Occures, when sta connects to AP on esp32.
+ */
+void WIFIEVENT_ap_connected(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+	wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
+    if (event != NULL) {
+        ESP_LOGI("wifi softAP", "station "MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
+    }
+}
+
+/* @ WIFI_EVENT_AP_STADISCONNECTED
+ * Occures, when sta disconnects from AP on esp32.
+ */
+void WIFIEVENT_ap_disconnected(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+	printf("sta disconnected\n");
+}
+
+
+
+
+
+

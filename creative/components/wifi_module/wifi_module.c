@@ -47,15 +47,6 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
         }
         wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
-    else if (event_id == WIFI_EVENT_AP_STACONNECTED) {
-        wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
-        if (event != NULL) {
-            ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",
-                     MAC2STR(event->mac), event->aid);
-        }
-    } else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
-        printf("1 sta disconnected\n");
-    }
 }
 
 
@@ -101,9 +92,11 @@ void wifi_init_apsta(void) {
     esp_event_handler_instance_t instance_got_ip;
     esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,    &event_handler, NULL, &instance_any_id);
 
-    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &WIFIEVENT_sta_got_ip,  NULL, &instance_got_ip);
-    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_LOST_IP,&WIFIEVENT_sta_lost_ip, NULL, NULL);
-    
+
+    esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP,  &WIFIEVENT_sta_got_ip,  NULL, &instance_got_ip);
+    esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_LOST_IP, &WIFIEVENT_sta_lost_ip, NULL, NULL);
+    esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &WIFIEVENT_ap_connected, NULL, NULL);
+    esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &WIFIEVENT_ap_disconnected, NULL, NULL);
 
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
