@@ -177,6 +177,9 @@ int connect_to_wifi(char *ssid, char *pass) {
         wifi_info.ssid     = mx_string_copy(ssid);
         wifi_info.password = mx_string_copy(pass);
     }
+    else {
+        status = -1;
+    }
     return status;
 }
 

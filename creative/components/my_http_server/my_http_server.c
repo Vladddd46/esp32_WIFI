@@ -25,8 +25,8 @@ static char *form_wrapper(char *ssid_name) {
  *  3. Sends response.
  */
 esp_err_t get_handler(httpd_req_t *req) {
-    char response[10000];
-    bzero(response, 10000);
+    char response[20000];
+    bzero(response, 20000);
     
     printf("scanning wifi_networks...\n");
     char **avaliable_networks = scan_wifi_networks();
@@ -61,8 +61,9 @@ esp_err_t get_handler(httpd_req_t *req) {
  *
  */
 esp_err_t post_handler(httpd_req_t *req) {
-    char content[100];
-    bzero(content, 100);
+    char content[800];
+    bzero(content, 800);
+
     size_t recv_size = sizeof(content);
     int ret = httpd_req_recv(req, content, recv_size);
     if (ret <= 0) {
@@ -71,19 +72,17 @@ esp_err_t post_handler(httpd_req_t *req) {
         }
         return ESP_FAIL;
     }
-    char *msg = "OK";
-    httpd_resp_send(req, msg, strlen(msg));
+    char *wifi_ssid  = strtok(content, "=");
+    char *wifi_pass  = strtok(NULL ,   "\r");
+
+    int status = connect_to_wifi(wifi_ssid, wifi_pass);
     
-    char **splt_data = mx_strsplit(content, '=');
-    char *wifi_ssid  = mx_string_copy(splt_data[0]);
-    char *wifi_pass  = mx_string_copy(splt_data[1]);
-
-    for (int i = 0; splt_data[i]; ++i) {
-        free(splt_data[i]);
+    char *msg = "OK. Device is connected to wifi";
+    if (status == -1) {
+        msg = "Connection failed. Some error occured(Maybe password is wrong). Try again.";
     }
-    free(splt_data);
+    httpd_resp_send(req, msg, strlen(msg));
 
-    printf("%s with pass %s\n", wifi_ssid, wifi_pass);
     return ESP_OK;
 }
 
@@ -109,7 +108,7 @@ httpd_uri_t uri_post = {
 // Initialize simple http server.
 httpd_handle_t http_server_init() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.stack_size = 80000;
+    config.stack_size = 180000;
     httpd_handle_t server = NULL;
 
     if (httpd_start(&server, &config) == ESP_OK) {
