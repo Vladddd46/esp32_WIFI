@@ -47,16 +47,6 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
         }
         wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
-    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
-        uart_print("\n\rSuccess! Got IP: ", 0, 0, GREEN_TEXT);
-        char got_ip[50];
-        bzero(got_ip, 50);
-        sprintf(got_ip, "%s", ip4addr_ntoa(&event->ip_info.ip));
-        uart_print(got_ip, 0, 1, NULL);
-        print_connection_log();
-        wifi_info.wifi_connection_state = CONNECTED_WIFI_STATE;
-    }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP) {
         uart_print("Lost IP", 0, 1, RED_TEXT);
         wifi_info.wifi_connection_state = DISCONNECTING_WIFI_STATE;
@@ -81,32 +71,24 @@ static void inline init_wifi_info_struct() {
 }
 
 
-#if WIFI_MODE == WIFI_STA_MODE
-// Initialize wifi routines in sta mode.
-void wifi_initialization_in_sta_mode() {
-    init_wifi_info_struct();
-    esp_netif_init();
-    esp_event_loop_create_default();
-    esp_netif_create_default_wifi_sta();
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    esp_wifi_init(&cfg);
-    esp_wifi_start();
-
-    esp_event_handler_instance_t instance_any_id;
-    esp_event_handler_instance_t instance_got_ip;
-    esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,    &event_handler, NULL, &instance_any_id);
-    esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip);
+// IP_EVENT_STA_GOT_IP
+void WIFIEVENT_sta_got_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+    ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+    uart_print("\n\rSuccess! Got IP: ", 0, 0, GREEN_TEXT);
+    char got_ip[50];
+    bzero(got_ip, 50);
+    sprintf(got_ip, "%s", ip4addr_ntoa(&event->ip_info.ip));
+    uart_print(got_ip, 0, 1, NULL);
+    print_connection_log();
+    wifi_info.wifi_connection_state = CONNECTED_WIFI_STATE;
 }
-#endif
-
-
 
 #if WIFI_MODE == WIFI_APSTA_MODE
 void wifi_init_apsta(void) {
     init_wifi_info_struct();
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    // esp_netif_create_default_wifi_sta();
+    esp_netif_create_default_wifi_sta();
     esp_netif_create_default_wifi_ap();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -115,27 +97,27 @@ void wifi_init_apsta(void) {
                                                         &event_handler,
                                                         NULL,
                                                         NULL));
-    wifi_config_t wifi_config = {
-        .ap = {
-            .ssid           = AP_SSID,
-            .ssid_len       = strlen(AP_SSID),
-            .channel        = WIFI_CHANNEL,
-            .password       = AP_PASSWORD,
-            .max_connection = MAX_NUM_OF_CONNECTIONS,
-            .authmode       = WIFI_AUTH_WPA_WPA2_PSK
-        },
-    };
-    if (strlen(AP_PASSWORD) == 0) {
-        wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-    }
+    // wifi_config_t wifi_config = {
+    //     .ap = {
+    //         .ssid           = AP_SSID,
+    //         .ssid_len       = strlen(AP_SSID),
+    //         .channel        = WIFI_CHANNEL,
+    //         .password       = AP_PASSWORD,
+    //         .max_connection = MAX_NUM_OF_CONNECTIONS,
+    //         .authmode       = WIFI_AUTH_WPA_WPA2_PSK
+    //     },
+    // };
+    // if (strlen(AP_PASSWORD) == 0) {
+    //     wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+    // }
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
+    // ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    // esp_event_handler_instance_t instance_any_id;
-    // esp_event_handler_instance_t instance_got_ip;
-    // esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,    &event_handler, NULL, &instance_any_id);
-    // esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip);
+    esp_event_handler_instance_t instance_any_id;
+    esp_event_handler_instance_t instance_got_ip;
+    esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,    &event_handler, NULL, &instance_any_id);
+    esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP, &WIFIEVENT_sta_got_ip, NULL, &instance_got_ip);
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
              AP_SSID, AP_PASSWORD, 1);
 }
