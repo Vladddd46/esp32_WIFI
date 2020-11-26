@@ -148,7 +148,7 @@ int connect_to_wifi(char *ssid, char *pass) {
     memcpy(wifi_station_config.sta.ssid,     ssid, strlen(ssid));
     memcpy(wifi_station_config.sta.password, pass, strlen(pass));
 
-    esp_wifi_set_mode(WIFI_MODE_STA);
+    // esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_station_config);
 
     wifi_info.wifi_connection_state = DISCONNECTING_WIFI_STATE;
