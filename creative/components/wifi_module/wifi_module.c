@@ -47,21 +47,17 @@ void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, voi
         }
         wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
     }
-    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP) {
-        uart_print("Lost IP", 0, 1, RED_TEXT);
-        wifi_info.wifi_connection_state = DISCONNECTING_WIFI_STATE;
-        esp_wifi_disconnect();
-        vTaskDelay(10);
-        wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
-    }
-        if (event_id == WIFI_EVENT_AP_STACONNECTED) {
+    else if (event_id == WIFI_EVENT_AP_STACONNECTED) {
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
-        ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",
-                 MAC2STR(event->mac), event->aid);
+        if (event != NULL) {
+            ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",
+                     MAC2STR(event->mac), event->aid);
+        }
     } else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
         printf("1 sta disconnected\n");
     }
 }
+
 
 static void inline init_wifi_info_struct() {
     // init wifi info stuct.
@@ -71,8 +67,6 @@ static void inline init_wifi_info_struct() {
 }
 
 
-
-#if WIFI_MODE == WIFI_APSTA_MODE
 void wifi_init_apsta(void) {
     init_wifi_info_struct();
     ESP_ERROR_CHECK(esp_netif_init());
@@ -106,9 +100,13 @@ void wifi_init_apsta(void) {
     esp_event_handler_instance_t instance_any_id;
     esp_event_handler_instance_t instance_got_ip;
     esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,    &event_handler, NULL, &instance_any_id);
-    esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP, &WIFIEVENT_sta_got_ip, NULL, &instance_got_ip);
+
+    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &WIFIEVENT_sta_got_ip,  NULL, &instance_got_ip);
+    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_LOST_IP,&WIFIEVENT_sta_lost_ip, NULL, NULL);
+    
+
+
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
              AP_SSID, AP_PASSWORD, 1);
 }
-#endif
 

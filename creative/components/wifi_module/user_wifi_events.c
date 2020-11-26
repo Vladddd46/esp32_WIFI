@@ -16,3 +16,15 @@ void WIFIEVENT_sta_got_ip(void *arg, esp_event_base_t event_base, int32_t event_
     print_connection_log();
     wifi_info.wifi_connection_state = CONNECTED_WIFI_STATE;
 }
+
+/* @ IP_EVENT_STA_LOST_IP
+ * Event occurs, when esp32 sta lose ip address.
+ */
+void WIFIEVENT_sta_lost_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
+    uart_print("Lost IP", 0, 1, RED_TEXT);
+    wifi_info.wifi_connection_state = DISCONNECTING_WIFI_STATE;
+    esp_wifi_disconnect();
+    vTaskDelay(10);
+    wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
+}
+
