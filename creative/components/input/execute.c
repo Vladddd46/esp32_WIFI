@@ -16,9 +16,9 @@ void execute(char **cmd, int len) {
     if (len == 0) {
         // pass
     }
-    else if (!strcmp(cmd[0], "connect")) {
-        connect_command(cmd);
-    }
+    // else if (!strcmp(cmd[0], "connect")) {
+        // connect_command(cmd);
+    // }
     // else if (!strcmp(cmd[0], "http_get")) {
         // http_get_command(cmd, len);
     // }

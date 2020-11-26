@@ -11,6 +11,5 @@
 #include <esp_http_server.h>
 #include <stdio.h>
 #include "utils.h"
-#include "connect_to_wifi.h"
 
 httpd_handle_t http_server_init(void);

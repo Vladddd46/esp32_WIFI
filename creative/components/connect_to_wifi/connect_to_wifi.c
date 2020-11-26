@@ -145,45 +145,38 @@ int connect_to_wifi(char *ssid, char *pass) {
             },
         },
     };
-    printf("a\n");
     memcpy(wifi_station_config.sta.ssid,     ssid, strlen(ssid));
     memcpy(wifi_station_config.sta.password, pass, strlen(pass));
-    printf("b\n");
-    // esp_wifi_set_mode(WIFI_MODE_STA);
+
+    esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_station_config);
-    printf("c\n");
+
     wifi_info.wifi_connection_state = DISCONNECTING_WIFI_STATE;
     esp_wifi_disconnect();
     vTaskDelay(10);
     wifi_info.wifi_connection_state = DISCONNECTED_WIFI_STATE;
-    printf("d\n");
+
     vTaskDelay(10);
     uart_print("Connecting...", 1, 0, GREEN_TEXT);
     wifi_info.wifi_connection_state = CONNECTING_WIFI_STATE;
     esp_wifi_connect();
-    printf("e\n");
+
     while(wifi_info.wifi_connection_state != DISCONNECTED_WIFI_STATE 
        && wifi_info.wifi_connection_state != CONNECTED_WIFI_STATE) {
         vTaskDelay(1);
     }
-    printf("f\n");
     if (wifi_info.wifi_connection_state == CONNECTED_WIFI_STATE) {
         write_wifi_account_in_nvc(ssid, pass);
-        printf("g\n");
+        
         if (wifi_info.ssid != NULL) {
             free(wifi_info.ssid);
         }
         if (wifi_info.password != NULL) {
             free(wifi_info.password);
         }
-        printf("h\n");
         wifi_info.ssid     = mx_string_copy(ssid);
         wifi_info.password = mx_string_copy(pass);
     }
-    else {
-        status = -1;
-    }
-    printf("i\n");
     return status;
 }
 

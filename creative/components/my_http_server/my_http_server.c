@@ -56,12 +56,9 @@ esp_err_t get_handler(httpd_req_t *req) {
 
 
 /* @ Received data, user entered to connect to wifi.
- * 1. Retreive post request.
- * 2. Retrieve wifi ssid and password.
- * 3. Try to connect to wifi with ssid and password.
- * 4. Sends response depending on connection status.
  * Received data structure:
  *  wifi_ssid=wifi_password
+ *
  */
 esp_err_t post_handler(httpd_req_t *req) {
     char content[100];
@@ -74,18 +71,19 @@ esp_err_t post_handler(httpd_req_t *req) {
         }
         return ESP_FAIL;
     }
-    printf("1\n");
-    char *wifi_ssid = strtok(content, "=");
-    char *wifi_pass = strtok(NULL, "\r");
-    printf("2\n");
-    int status = connect_to_wifi(wifi_ssid, wifi_pass);
-    printf("3\n");
-    char *msg = "OK. Device is connected to wifi.";
-    if (status == -1) {
-        msg = "Error. Not connected to wifi. Try again.";
-    }
-    printf("4\n");
+    char *msg = "OK";
     httpd_resp_send(req, msg, strlen(msg));
+    
+    char **splt_data = mx_strsplit(content, '=');
+    char *wifi_ssid  = mx_string_copy(splt_data[0]);
+    char *wifi_pass  = mx_string_copy(splt_data[1]);
+
+    for (int i = 0; splt_data[i]; ++i) {
+        free(splt_data[i]);
+    }
+    free(splt_data);
+
+    printf("%s with pass %s\n", wifi_ssid, wifi_pass);
     return ESP_OK;
 }
 
@@ -111,7 +109,7 @@ httpd_uri_t uri_post = {
 // Initialize simple http server.
 httpd_handle_t http_server_init() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.stack_size = 150000;
+    config.stack_size = 80000;
     httpd_handle_t server = NULL;
 
     if (httpd_start(&server, &config) == ESP_OK) {
@@ -120,6 +118,3 @@ httpd_handle_t http_server_init() {
     }
     return server;
 }
-
-
-
