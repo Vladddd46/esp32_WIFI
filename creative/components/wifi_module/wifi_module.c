@@ -27,6 +27,7 @@ static void inline init_wifi_info_struct() {
  */
 
 // Initialize wifi routines in sta mode.
+
 void wifi_initialization_in_sta_mode() {
     init_wifi_info_struct();
     esp_netif_init();
