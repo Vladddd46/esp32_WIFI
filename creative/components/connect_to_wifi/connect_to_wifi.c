@@ -13,7 +13,6 @@
 #define WIFI_FAIL_BIT              BIT1
 
 
-
 static int connect_command_syntax_validate(char **cmd) {
     int len = mx_strarr_len(cmd);
 
@@ -131,6 +130,40 @@ static void inline write_wifi_account_in_nvc(char *ssid, char *pass) {
 
 
 /*
+ * Saves ssid and pass in
+ *  non-volatile storage.
+ */
+static void inline write_default_wifi_account_in_nvc(char *ssid, char *pass) {
+    nvs_handle_t my_handle;
+    esp_err_t err;
+    char error_msg[100];
+    bzero(error_msg, 100);
+
+    err = nvs_open(WIFI_STORAGE, NVS_READWRITE, &my_handle);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while opening nvc: %d", err);
+        uart_print(error_msg, 0, 1, RED_TEXT);
+        return;
+    }
+    err = nvs_set_str(my_handle, DEFAULT_SSID, ssid);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while writing in nvc: %d", err);
+        uart_print(error_msg, 0, 1, RED_TEXT);
+        return;
+    }
+    err = nvs_set_str(my_handle, DEFAULT_PASS, pass);
+    if (err != ESP_OK) {
+        sprintf(error_msg, "Error while writing in nvc: %d", err);
+        uart_print(error_msg, 0, 1, RED_TEXT);
+        return;
+    }
+    nvs_close(my_handle);
+}
+
+
+
+
+/*
  * Connects to WiFi with given ssid and pass.
  */
 int connect_to_wifi(char *ssid, char *pass) {
@@ -161,13 +194,14 @@ int connect_to_wifi(char *ssid, char *pass) {
     wifi_info.wifi_connection_state = CONNECTING_WIFI_STATE;
     esp_wifi_connect();
 
+
     while(wifi_info.wifi_connection_state != DISCONNECTED_WIFI_STATE 
        && wifi_info.wifi_connection_state != CONNECTED_WIFI_STATE) {
         vTaskDelay(1);
     }
     if (wifi_info.wifi_connection_state == CONNECTED_WIFI_STATE) {
-        write_wifi_account_in_nvc(ssid, pass);
-        
+        // write_wifi_account_in_nvc(ssid, pass);
+        write_default_wifi_account_in_nvc(ssid, pass);
         if (wifi_info.ssid != NULL) {
             free(wifi_info.ssid);
         }

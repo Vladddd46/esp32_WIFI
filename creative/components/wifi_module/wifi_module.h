@@ -48,6 +48,8 @@ bool cmd_is_executing;
 // initialize wifi in AP_STA(access point and station) mode.
 void wifi_init_apsta(void);
 
+void wifi_initialization_in_sta_mode();
+
 // WIFI EVENTS
 void WIFIEVENT_sta_got_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 void WIFIEVENT_sta_lost_ip(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);

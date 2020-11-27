@@ -35,8 +35,16 @@ void app_main() {
     uart_init(9600);
     nvc_init();
 
-    wifi_init_apsta();  // initialize wifi routines.
-    http_server_init(); // turn on http server.
+    char *default_ssid = get_value_by_key_from_nvs(WIFI_STORAGE, DEFAULT_SSID);
+    char *default_pass = get_value_by_key_from_nvs(WIFI_STORAGE, DEFAULT_PASS);
+    if (default_ssid != NULL && default_pass != NULL) {
+        wifi_initialization_in_sta_mode();
+        connect_to_wifi(default_ssid, default_pass);
+    }
+    else {
+        wifi_init_apsta();  // initialize wifi routines.
+        http_server_init(); // turn on http server.
+    }
 
     xTaskCreate(user_input, "user_input", 72040, NULL, 10, NULL);
 }

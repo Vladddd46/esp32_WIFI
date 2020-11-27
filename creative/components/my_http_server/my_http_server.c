@@ -82,7 +82,8 @@ esp_err_t post_handler(httpd_req_t *req) {
         msg = "Connection failed. Some error occured(Maybe password is wrong). Try again.";
     }
     httpd_resp_send(req, msg, strlen(msg));
-
+    vTaskDelay(10);
+    esp_restart();
     return ESP_OK;
 }
 

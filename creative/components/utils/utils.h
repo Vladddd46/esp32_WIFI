@@ -10,6 +10,7 @@
 #include "libmx.h"
 #include <netdb.h>
 #include "esp_wifi.h"
+#include "nvs_flash.h"
 
 #define UART_PORT   UART_NUM_1
 
@@ -20,6 +21,9 @@
 #define YELLOW_TEXT "\e[33m"
 #define RESET_COLOR "\e[0m"
 
+#define DEFAULT_SSID "SSID"
+#define DEFAULT_PASS "PASS"
+
 void uart_print(char *msg, bool newline_1, bool newline_2, char *color);
 
 int  create_connected_socket(char *ip, int port);
@@ -29,3 +33,5 @@ char *resolve_ip_by_host_name(char *host_name);
 char *get_mac_address(void);
 
 char **scan_wifi_networks();
+
+char *get_value_by_key_from_nvs(char *nvs_page, char *key);
