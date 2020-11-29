@@ -106,6 +106,7 @@ httpd_uri_t uri_post = {
 };
 
 
+
 // Initialize simple http server.
 httpd_handle_t http_server_init() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();

@@ -23,15 +23,6 @@ void execute(char **cmd, int len) {
         nvs_flash_erase();
         esp_restart();
     }
-    // else if (!strcmp(cmd[0], "http_get")) {
-        // http_get_command(cmd, len);
-    // }
-    // else if (!strcmp(cmd[0], "tehu")) {
-        // tehu_command(cmd, len);
-    // }
-    // else if (!strcmp(cmd[0], "tz_set")) {
-        // tz_set(cmd, len);
-    // }
     else {
         no_such_command_error();
     }

@@ -9,26 +9,11 @@ static void inline init_wifi_info_struct() {
     wifi_info.password = NULL;
 }
 
-/* @ AP config
-    // wifi_config_t wifi_config = {
-    //     .ap = {
-    //         .ssid           = AP_SSID,
-    //         .ssid_len       = strlen(AP_SSID),
-    //         .channel        = WIFI_CHANNEL,
-    //         .password       = AP_PASSWORD,
-    //         .max_connection = MAX_NUM_OF_CONNECTIONS,
-    //         .authmode       = WIFI_AUTH_WPA_WPA2_PSK
-    //     },
-    // };
-    // if (strlen(AP_PASSWORD) == 0) {
-    //     wifi_config.ap.authmode = WIFI_AUTH_OPEN;
-    // }
-    // ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
- */
+
 
 // Initialize wifi routines in sta mode.
-
 void wifi_initialization_in_sta_mode() {
+    // esp_wifi_set_mode(WIFI_MODE_STA);
     init_wifi_info_struct();
     esp_netif_init();
     esp_event_loop_create_default();
@@ -45,7 +30,7 @@ void wifi_initialization_in_sta_mode() {
 }
 
 
-
+// Initialize wifi routines in apsta mode.
 void wifi_init_apsta(void) {
     init_wifi_info_struct();
     ESP_ERROR_CHECK(esp_netif_init());
