@@ -13,7 +13,6 @@ static void inline init_wifi_info_struct() {
 
 // Initialize wifi routines in sta mode.
 void wifi_initialization_in_sta_mode() {
-    // esp_wifi_set_mode(WIFI_MODE_STA);
     init_wifi_info_struct();
     esp_netif_init();
     esp_event_loop_create_default();
@@ -27,6 +26,7 @@ void wifi_initialization_in_sta_mode() {
     esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_GOT_IP,           &WIFIEVENT_sta_got_ip,      NULL, &instance_got_ip);
     esp_event_handler_instance_register(IP_EVENT,   IP_EVENT_STA_LOST_IP,          &WIFIEVENT_sta_lost_ip,     NULL, NULL);
     esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED,   &WIFIEVENT_sta_disconnected,NULL, &instance_sta_disconnected);
+    esp_wifi_set_mode(WIFI_MODE_STA);
 }
 
 
