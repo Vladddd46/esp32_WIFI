@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "libmx.h"
 #include "connect_to_wifi.h"
+#include "wrappers.h"
 
 #define WIFI_STA_MODE   0
 #define WIFI_AP_MODE    1
