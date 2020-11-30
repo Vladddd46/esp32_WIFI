@@ -22,9 +22,10 @@ esp_err_t get_handler(httpd_req_t *req) {
     char **avaliable_networks = scan_wifi_networks();
     printf("end scann\n");
     
+    char *wrapped_str;
     int index = 0;
     for (int i = 0; avaliable_networks[i]; ++i) {
-        char *wrapped_str = tag_wrapper(avaliable_networks[i], "h3");
+        wrapped_str = tag_wrapper(avaliable_networks[i], "h3");
         for (int j = 0; wrapped_str[j]; ++j) {
            response[index] = wrapped_str[j];
            index++;
