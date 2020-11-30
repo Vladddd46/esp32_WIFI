@@ -14,8 +14,9 @@ void wifi_auto_connect() {
     esp_wifi_scan_start(NULL, true);
 
     uint16_t ap_num;
-    wifi_ap_record_t ap_records[20];
-    bzero(ap_records, 20);
+    esp_wifi_scan_get_ap_num(&ap_num);
+    wifi_ap_record_t ap_records[ap_num];
+    bzero(ap_records, ap_num);
     esp_wifi_scan_get_ap_records(&ap_num, ap_records);
 
     nvs_handle_t my_handle;
