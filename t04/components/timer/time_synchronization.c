@@ -25,13 +25,8 @@ void time_synchronization(void *arg) {
         }
         time(&now);
         localtime_r(&now, &timeinfo);
-        // char strftime_buf[64];
-        // strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-        // printf("%s\n", strftime_buf);
-        // printf("hour:%d min:%d sec:%d\n", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
         synchronized_time = (timeinfo.tm_hour * 3600) + (timeinfo.tm_min * 60) + timeinfo.tm_sec;
         current_time = synchronized_time;
-        // printf("=%d\n", synchronized_time);
         vTaskDelay(1000);
     }
 }

@@ -1,9 +1,6 @@
 #include "tehu.h"
   
 
-static const char* ERRORTAG = "error: ";
-static const char* INFOTAG = "info: ";
-
 /* @ Sends dht11 data to server with ip and port, received from queue.
  * Received data from queue.
  * If received data == "stop" => stops sending data to server.
@@ -82,31 +79,31 @@ static esp_err_t tls_send(char *payload, char *host_domain) {
     if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                      (const unsigned char*)pers,
                                      strlen(pers))) != 0) {
-        ESP_LOGE(ERRORTAG, "mbedtls_ctr_drbg_seed failed %d\n", ret);
+        ESP_LOGE("error: ", "mbedtls_ctr_drbg_seed failed %d\n", ret);
         return (ESP_FAIL);
     }
 
     if ((ret = mbedtls_net_connect(&server_fd, host_domain, port, MBEDTLS_NET_PROTO_TCP)) != 0) {
-        ESP_LOGE(ERRORTAG, "mbedtls_net_connect failed %d\n", ret);
+        ESP_LOGE("error: ", "mbedtls_net_connect failed %d\n", ret);
         return (ESP_FAIL);
     }
 
     if ((ret = mbedtls_ssl_config_defaults(&conf, MBEDTLS_SSL_IS_CLIENT,
                                            MBEDTLS_SSL_TRANSPORT_STREAM,
                                            MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
-        ESP_LOGE(ERRORTAG, "mbedtls_ssl_config_defaults failed %d\n", ret);
+        ESP_LOGE("error: ", "mbedtls_ssl_config_defaults failed %d\n", ret);
     }
     mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_NONE);
     mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
     ret = mbedtls_ssl_setup(&ssl, &conf);
     if (ret != 0) {
         mbedtls_strerror(ret, errortext, sizeof(errortext));
-        ESP_LOGE(ERRORTAG, "error from mbedtls_ssl_setup: %d - %x - %s\n", ret,
+        ESP_LOGE("error: ", "error from mbedtls_ssl_setup: %d - %x - %s\n", ret,
                  ret, errortext);
     }
 
     if ((ret = mbedtls_ssl_set_hostname(&ssl, host_domain)) != 0) {
-        ESP_LOGE(ERRORTAG, "mbedtls_ssl_set_hostname failed %d\n", ret);
+        ESP_LOGE("error: ", "mbedtls_ssl_set_hostname failed %d\n", ret);
     }
 
     mbedtls_ssl_set_bio(&ssl, &server_fd, mbedtls_net_send, mbedtls_net_recv, NULL);
@@ -120,12 +117,12 @@ static esp_err_t tls_send(char *payload, char *host_domain) {
     esp_err_t err = mbedtls_ssl_write(&ssl, pay_buff, strlen(p));
 
     if (err < 0) {
-        ESP_LOGE(ERRORTAG, "Error occurred during sending: errno %d", errno);
+        ESP_LOGE("error: ", "Error occurred during sending: errno %d", errno);
     }
     else {
         int32_t len = mbedtls_ssl_read(&ssl, rx_buffer, sizeof(rx_buffer) - 1);
         if (len < 0) {
-            ESP_LOGE(ERRORTAG, "recv failed: errno %d", errno);
+            ESP_LOGE("error: ", "recv failed: errno %d", errno);
         }
         else {
             printf(">>%s\n", rx_buffer);
